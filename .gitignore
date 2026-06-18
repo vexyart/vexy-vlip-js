@@ -24,3 +24,4 @@ testdata/_rec/
 .omc/
 test-results/
 /.codegraph
+scripts/*.png
