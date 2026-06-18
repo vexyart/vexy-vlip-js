@@ -2,51 +2,51 @@ function w(i) {
   if (typeof i != "string") return NaN;
   const t = i.trim().match(/^(?:(\d+):)?(\d{1,2}):(\d{2})(?:[.,](\d{1,3}))?$/);
   if (!t) return NaN;
-  const [, e, s, r, a] = t;
-  return (e ? Number(e) : 0) * 3600 + Number(s) * 60 + Number(r) + (a ? Number(a.padEnd(3, "0")) / 1e3 : 0);
+  const [, e, s, n, r] = t;
+  return (e ? Number(e) : 0) * 3600 + Number(s) * 60 + Number(n) + (r ? Number(r.padEnd(3, "0")) / 1e3 : 0);
 }
-function F(i) {
+function B(i) {
   const t = {};
   if (!i) return t;
   for (const e of i.trim().split(/\s+/)) {
     const s = e.indexOf(":");
     if (s <= 0) continue;
-    const r = e.slice(0, s), a = e.slice(s + 1);
-    ["position", "line", "size", "align", "vertical", "region"].includes(r) && (t[r] = a);
+    const n = e.slice(0, s), r = e.slice(s + 1);
+    ["position", "line", "size", "align", "vertical", "region"].includes(n) && (t[n] = r);
   }
   return t;
 }
-const R = /^(\d{1,2}:)?\d{1,2}:\d{2}[.,]\d{1,3}\s*-->\s*(\d{1,2}:)?\d{1,2}:\d{2}[.,]\d{1,3}/;
-function $(i) {
+const F = /^(\d{1,2}:)?\d{1,2}:\d{2}[.,]\d{1,3}\s*-->\s*(\d{1,2}:)?\d{1,2}:\d{2}[.,]\d{1,3}/;
+function R(i) {
   const t = [];
   if (typeof i != "string") return t;
   const s = i.replace(/^﻿/, "").replace(/\r\n?/g, `
 `).split(/\n\n+/);
-  let r = 0;
-  for (const a of s) {
-    const n = a.split(`
-`).filter((B) => B.length > 0);
-    if (n.length === 0) continue;
+  let n = 0;
+  for (const r of s) {
+    const a = r.split(`
+`).filter(($) => $.length > 0);
+    if (a.length === 0) continue;
     let o = 0;
-    if (/^WEBVTT/.test(n[0]) && r === 0 && !R.test(n[0])) {
-      if (n.length === 1) continue;
+    if (/^WEBVTT/.test(a[0]) && n === 0 && !F.test(a[0])) {
+      if (a.length === 1) continue;
       o = 1;
     }
-    if (/^(NOTE|STYLE|REGION)\b/.test(n[o])) continue;
-    let l = "";
-    n[o] && !n[o].includes("-->") && (l = n[o], o += 1);
-    const d = n[o];
-    if (!d || !d.includes("-->")) continue;
-    const h = d.indexOf("-->"), _ = w(d.slice(0, h)), p = d.slice(h + 3).trim(), v = p.indexOf(" "), A = v === -1 ? p : p.slice(0, v), I = v === -1 ? "" : p.slice(v + 1), x = w(A);
+    if (/^(NOTE|STYLE|REGION)\b/.test(a[o])) continue;
+    let d = "";
+    a[o] && !a[o].includes("-->") && (d = a[o], o += 1);
+    const l = a[o];
+    if (!l || !l.includes("-->")) continue;
+    const h = l.indexOf("-->"), _ = w(l.slice(0, h)), p = l.slice(h + 3).trim(), f = p.indexOf(" "), L = f === -1 ? p : p.slice(0, f), I = f === -1 ? "" : p.slice(f + 1), x = w(L);
     if (Number.isNaN(_) || Number.isNaN(x)) continue;
-    const M = n.slice(o + 1).join(`
+    const M = a.slice(o + 1).join(`
 `);
     t.push({
-      index: r++,
-      id: l,
+      index: n++,
+      id: d,
       start: _,
       end: x,
-      settings: F(I),
+      settings: B(I),
       payload: M
     });
   }
@@ -58,7 +58,7 @@ function D(i) {
 }
 function E(i) {
   let t = D(i);
-  return t = t.replace(/`([^`]+)`/g, "<code>$1</code>"), t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>"), t = t.replace(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>"), t = t.replace(/\n/g, "<br>"), t;
+  return t = t.replace(/`([^`]+)`/g, "<code>$1</code>"), t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>"), t = t.replace(new RegExp("(?<!\\*)\\*([^*\\n]+)\\*(?!\\*)", "g"), "<em>$1</em>"), t = t.replace(/\n/g, "<br>"), t;
 }
 const H = /* @__PURE__ */ new Set([
   "center",
@@ -74,7 +74,7 @@ const H = /* @__PURE__ */ new Set([
 function b(i) {
   return typeof i == "number" ? i : typeof i == "string" ? parseFloat(i.replace("%", "")) : NaN;
 }
-function P(i) {
+function O(i) {
   const t = (i || "").trim();
   if (!t.startsWith("{")) return null;
   try {
@@ -84,24 +84,24 @@ function P(i) {
     return null;
   }
 }
-function O(i, t = {}) {
-  const e = P(i.payload), s = i.settings || {};
-  let r, a;
-  e && typeof e.html == "string" ? (r = e.html, a = e.text || "") : e && typeof e.text == "string" ? (a = e.text, r = E(e.text)) : (a = i.payload, r = E(i.payload));
-  let n = e && e.x != null ? e.x : b(s.position), o = e && e.y != null ? e.y : b(s.line), l = e && e.w != null ? e.w : b(s.size), d = e && e.anchor, h = e && e.align || s.align || "start";
+function j(i, t = {}) {
+  const e = O(i.payload), s = i.settings || {};
+  let n, r;
+  e && typeof e.html == "string" ? (n = e.html, r = e.text || "") : e && typeof e.text == "string" ? (r = e.text, n = E(e.text)) : (r = i.payload, n = E(i.payload));
+  let a = e && e.x != null ? e.x : b(s.position), o = e && e.y != null ? e.y : b(s.line), d = e && e.w != null ? e.w : b(s.size), l = e && e.anchor, h = e && e.align || s.align || "start";
   h === "left" && (h = "start"), h === "right" && (h = "end");
-  const _ = n != null && n !== "" && !(typeof n == "number" && Number.isNaN(n)), p = o != null && o !== "" && !(typeof o == "number" && Number.isNaN(o)), v = l != null && l !== "" && !(typeof l == "number" && Number.isNaN(l));
-  return (!d || !H.has(d)) && (d = "bottom"), _ || (n = 50), p || (o = 88), {
+  const _ = a != null && a !== "" && !(typeof a == "number" && Number.isNaN(a)), p = o != null && o !== "" && !(typeof o == "number" && Number.isNaN(o)), f = d != null && d !== "" && !(typeof d == "number" && Number.isNaN(d));
+  return (!l || !H.has(l)) && (l = "bottom"), _ || (a = 50), p || (o = 88), {
     index: i.index,
     id: i.id,
     start: i.start,
     end: i.end,
-    text: a,
-    html: r,
+    text: r,
+    html: n,
     isHtml: !!(e && typeof e.html == "string"),
-    placement: { x: n, y: o, w: v ? l : null, anchor: d, align: h },
+    placement: { x: a, y: o, w: f ? d : null, anchor: l, align: h },
     style: {
-      bg: e && (e.bg ?? (e.opacity != null ? null : void 0)),
+      bg: e ? e.bg : void 0,
       fg: e && e.fg,
       font: e && e.font,
       padding: e && e.padding,
@@ -115,39 +115,39 @@ function O(i, t = {}) {
     exit: e && e.exit || t.exit || "fade"
   };
 }
-function j(i, t = {}) {
-  return $(i).map((e) => O(e, t));
+function q(i, t = {}) {
+  return R(i).map((e) => j(e, t));
 }
 const m = 0.02;
-function q(i) {
+function U(i) {
   return i.map((t, e) => ({ index: e, time: t.start, end: t.end })).sort((t, e) => t.time - e.time);
 }
-function U(i, t) {
+function V(i, t) {
   for (let e = 0; e < i.length; e++)
     if (t >= i[e].start - m && t < i[e].end - m) return e;
   return -1;
 }
-function V(i, t, e = m) {
-  let s = -1, r = 1 / 0;
-  for (let a = 0; a < i.length; a++) {
-    const n = i[a].start;
-    n > t + e && n < r && (r = n, s = a);
+function P(i, t, e = m) {
+  let s = -1, n = 1 / 0;
+  for (let r = 0; r < i.length; r++) {
+    const a = i[r].start;
+    a > t + e && a < n && (n = a, s = r);
   }
   return s;
 }
-function K(i, t, e = m) {
-  let s = -1, r = -1 / 0;
-  for (let a = 0; a < i.length; a++) {
-    const n = i[a].start;
-    n < t - e && n > r && (r = n, s = a);
+function Y(i, t, e = m) {
+  let s = -1, n = -1 / 0;
+  for (let r = 0; r < i.length; r++) {
+    const a = i[r].start;
+    a < t - e && a > n && (n = a, s = r);
   }
   return s;
 }
-function f(i, t, e = m) {
-  let s = -1, r = -1 / 0;
-  for (let a = 0; a < i.length; a++) {
-    const n = i[a].start;
-    n <= t + e && n > r && (r = n, s = a);
+function v(i, t, e = m) {
+  let s = -1, n = -1 / 0;
+  for (let r = 0; r < i.length; r++) {
+    const a = i[r].start;
+    a <= t + e && a > n && (n = a, s = r);
   }
   return s;
 }
@@ -162,24 +162,44 @@ const k = {
   "bottom-left": "translate(0, -100%)",
   "bottom-right": "translate(-100%, -100%)"
 };
-function g(i, t = "%") {
+function y(i, t = "%") {
   return i == null ? null : typeof i == "number" ? `${i}${t}` : String(i);
 }
-function Y(i, t) {
-  i.style.left = g(t.x), i.style.top = g(t.y), i.style.transform = k[t.anchor] || k.bottom, t.w != null ? i.style.width = g(t.w) : i.style.width = "";
+function K(i, t) {
+  i.style.left = y(t.x), i.style.top = y(t.y), i.style.transform = k[t.anchor] || k.bottom, t.w != null ? i.style.width = y(t.w) : i.style.width = "";
 }
-function W(i, t, e) {
-  t && (t.fg && (i.style.color = t.fg), t.font && (i.style.font = t.font), t.padding && (i.style.padding = t.padding), t.radius != null && (i.style.borderRadius = g(t.radius, "px")), t.border && (i.style.border = t.border), t.shadow && (i.style.boxShadow = t.shadow), t.bg && (i.style.background = t.bg, t.opacity != null && (i.style.opacity = "")), t.opacity != null && !t.bg && (i.style.background = `rgba(12, 18, 28, ${t.opacity})`), e && (i.style.textAlign = e));
+function W(i, t) {
+  if (i == null) return;
+  if (t == null || t >= 1) return i;
+  const e = Math.max(0, Math.min(1, Number(t))), s = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(i.trim());
+  if (s) {
+    let r = s[1];
+    r.length === 3 && (r = r.split("").map((l) => l + l).join(""));
+    const a = parseInt(r.slice(0, 2), 16), o = parseInt(r.slice(2, 4), 16), d = parseInt(r.slice(4, 6), 16);
+    return `rgba(${a}, ${o}, ${d}, ${e})`;
+  }
+  const n = /^rgba?\(([^)]+)\)$/i.exec(i.trim());
+  if (n) {
+    const r = n[1].split(",").map((a) => a.trim()).slice(0, 3);
+    if (r.length === 3) return `rgba(${r.join(", ")}, ${e})`;
+  }
+  return i;
+}
+function J(i, t, e) {
+  if (!t) return;
+  t.fg && (i.style.color = t.fg), t.font && (i.style.font = t.font), t.padding && (i.style.padding = t.padding), t.radius != null && (i.style.borderRadius = y(t.radius, "px")), t.border && (i.style.border = t.border), t.shadow && (i.style.boxShadow = t.shadow);
+  const s = W(t.bg, t.opacity);
+  s && (i.style.background = s), e && (i.style.textAlign = e);
 }
 function G(i, t, e = {}) {
   const s = i.createElement("div");
   s.className = "vexy-vlip__card", s.dataset.index = String(t.index), s.dataset.enter = t.enter || "fade", s.setAttribute("role", "note"), t.className && (s.className += " " + t.className);
-  const r = i.createElement("div");
-  r.className = "vexy-vlip__body";
-  let a = t.html;
-  return t.isHtml && typeof e.sanitize == "function" && (a = e.sanitize(a)), r.innerHTML = a, Y(s, t.placement), W(r, t.style, t.placement.align), s.appendChild(r), s;
+  const n = i.createElement("div");
+  n.className = "vexy-vlip__body";
+  let r = t.html;
+  return t.isHtml && typeof e.sanitize == "function" && (r = e.sanitize(r)), n.innerHTML = r, K(s, t.placement), J(n, t.style, t.placement.align), s.appendChild(n), s;
 }
-class J {
+class X {
   /**
    * @param {HTMLElement} layerEl .vexy-vlip__cards container
    * @param {object} [opts] { sanitize }
@@ -211,7 +231,7 @@ class J {
     return t && t.classList.remove("vexy-vlip__card--in"), this.activeIndex = -1, !0;
   }
 }
-const S = "vexy-vlip-styles", L = `
+const S = "vexy-vlip-styles", A = `
 .vexy-vlip {
   --vv-card-bg: rgba(12, 18, 28, 0.9);
   --vv-card-fg: #ffffff;
@@ -363,20 +383,20 @@ const S = "vexy-vlip-styles", L = `
   .vexy-vlip__body { transition: opacity 0.001s; transform: none !important; }
 }
 `;
-function X() {
-  return `:host{display:inline-block;position:relative;max-width:100%}:host([hidden]){display:none}${L}`;
+function Q() {
+  return `:host{display:inline-block;position:relative;max-width:100%}:host([hidden]){display:none}${A}`;
 }
-function Q(i) {
+function Z(i) {
   if (!i || i.getElementById(S)) return;
   const t = i.createElement("style");
-  t.id = S, t.textContent = L, i.head.appendChild(t);
+  t.id = S, t.textContent = A, i.head.appendChild(t);
 }
-const y = {
+const g = {
   linear: (i) => i,
   "ease-in": (i) => i * i,
   "ease-out": (i) => 1 - (1 - i) * (1 - i),
   "ease-in-out": (i) => i * i * (3 - 2 * i)
-}, Z = {
+}, tt = {
   src: "",
   track: "",
   vtt: "",
@@ -403,7 +423,7 @@ const y = {
   muted: "🔇",
   fs: "⤢"
 };
-class C {
+class N {
   /**
    * @param {HTMLElement} target container element (or an existing <video>).
    * @param {Partial<typeof DEFAULTS>} [options]
@@ -411,47 +431,49 @@ class C {
   constructor(t, e = {}) {
     if (!t || !t.ownerDocument)
       throw new TypeError("VexyVlip: a target element is required");
-    this.opts = { ...Z, ...e }, this.doc = t.ownerDocument, this.cards = [], this.stops = [], this._destroyed = !1, this._ready = !1, this._target = null, this._pendingSeg = -1, this._stepIndex = -1, this._playingToEnd = !1, this._ease = null, this._looping = !1, this._mode = this.opts.mode === "stepped" ? "stepped" : "continuous", this._buildDom(t), this.opts.injectStyles && !this._inShadow && Q(this.doc), this._wireEvents(), this._loadMedia();
+    this.opts = { ...tt, ...e }, this.doc = t.ownerDocument, this.cards = [], this.stops = [], this._destroyed = !1, this._ready = !1, this._target = null, this._pendingSeg = -1, this._stepIndex = -1, this._playingToEnd = !1, this._ease = null, this._looping = !1, this._frame = null, this._mode = this.opts.mode === "stepped" ? "stepped" : "continuous", this._ac = new AbortController(), this._buildDom(t), this.opts.injectStyles && !this._inShadow && Z(this.doc), this._wireEvents(), this._loadMedia();
   }
   // ---- DOM ---------------------------------------------------------------
   _buildDom(t) {
     const e = this.doc;
     if (t.tagName === "VIDEO") {
       this.video = t;
-      const r = e.createElement("div");
-      t.replaceWith(r), r.appendChild(t), this.root = r;
+      const n = e.createElement("div");
+      t.replaceWith(n), n.appendChild(t), this.root = n;
     } else
       this.root = t, this.video = e.createElement("video"), this.root.appendChild(this.video);
     this._inShadow = this.root.getRootNode() instanceof ShadowRoot, this.root.classList.add("vexy-vlip"), this.root.dataset.mode = this._mode, this.root.tabIndex = this.root.tabIndex >= 0 ? this.root.tabIndex : 0;
     const s = this.video;
-    s.classList.add("vexy-vlip__video"), s.playsInline = !0, s.preload = "metadata", this.opts.src && (s.src = this.opts.src), this.opts.poster && (s.poster = this.opts.poster), s.loop = !!this.opts.loop, s.muted = !!this.opts.muted, s.controls = !1, this.tap = e.createElement("button"), this.tap.className = "vexy-vlip__tap", this.tap.type = "button", this.tap.setAttribute("aria-label", "Advance to the next step"), this.root.appendChild(this.tap), this.cardsLayer = e.createElement("div"), this.cardsLayer.className = "vexy-vlip__cards", this.cardsLayer.setAttribute("aria-live", "polite"), this.root.appendChild(this.cardsLayer), this.layer = new J(this.cardsLayer, {
-      sanitize: this.opts.sanitize ? tt : void 0
+    s.classList.add("vexy-vlip__video"), s.playsInline = !0, s.preload = "metadata", this.opts.src && (s.src = this.opts.src), this.opts.poster && (s.poster = this.opts.poster), s.loop = !!this.opts.loop && this._mode !== "stepped", s.muted = !!this.opts.muted, s.controls = !1, this.tap = e.createElement("button"), this.tap.className = "vexy-vlip__tap", this.tap.type = "button", this.tap.setAttribute("aria-label", "Advance to the next step"), this.root.appendChild(this.tap), this.cardsLayer = e.createElement("div"), this.cardsLayer.className = "vexy-vlip__cards", this.cardsLayer.setAttribute("aria-live", "polite"), this.root.appendChild(this.cardsLayer), this.layer = new X(this.cardsLayer, {
+      sanitize: this.opts.sanitize ? et : void 0
     }), this.opts.hint && (this.hint = e.createElement("div"), this.hint.className = "vexy-vlip__hint", this.hint.textContent = "Click to continue", this.root.appendChild(this.hint)), this.opts.controls && this._buildControls();
   }
   _buildControls() {
     const t = this.doc, e = t.createElement("div");
     e.className = "vexy-vlip__controls";
     const s = (r, a) => {
-      const n = t.createElement("button");
-      return n.className = "vexy-vlip__btn", n.type = "button", n.textContent = r, n.setAttribute("aria-label", a), n;
+      const o = t.createElement("button");
+      return o.className = "vexy-vlip__btn", o.type = "button", o.textContent = r, o.setAttribute("aria-label", a), o;
     };
-    this._playBtn = s(c.play, "Play"), this._prevBtn = s(c.prev, "Previous step"), this._nextBtn = s(c.next, "Next step"), this._dots = t.createElement("div"), this._dots.className = "vexy-vlip__dots", this._time = t.createElement("span"), this._time.className = "vexy-vlip__time", this._muteBtn = s(this.opts.muted ? c.muted : c.mute, "Mute"), this._fsBtn = s(c.fs, "Fullscreen"), e.append(this._prevBtn, this._playBtn, this._nextBtn, this._dots, this._time, this._muteBtn, this._fsBtn), this.root.appendChild(e), this._playBtn.addEventListener("click", () => this.toggle()), this._prevBtn.addEventListener("click", () => this.prev()), this._nextBtn.addEventListener("click", () => this.next()), this._muteBtn.addEventListener("click", () => this._toggleMute()), this._fsBtn.addEventListener("click", () => this._toggleFullscreen());
+    this._playBtn = s(c.play, "Play"), this._prevBtn = s(c.prev, "Previous step"), this._nextBtn = s(c.next, "Next step"), this._dots = t.createElement("div"), this._dots.className = "vexy-vlip__dots", this._time = t.createElement("span"), this._time.className = "vexy-vlip__time", this._muteBtn = s(this.opts.muted ? c.muted : c.mute, "Mute"), this._fsBtn = s(c.fs, "Fullscreen"), e.append(this._prevBtn, this._playBtn, this._nextBtn, this._dots, this._time, this._muteBtn, this._fsBtn), this._controlsBar = e, this.root.appendChild(e);
+    const n = { signal: this._ac.signal };
+    this._playBtn.addEventListener("click", () => this.toggle(), n), this._prevBtn.addEventListener("click", () => this.prev(), n), this._nextBtn.addEventListener("click", () => this.next(), n), this._muteBtn.addEventListener("click", () => this._toggleMute(), n), this._fsBtn.addEventListener("click", () => this._toggleFullscreen(), n);
   }
   _buildDots() {
     this._dots && (this._dots.replaceChildren(), this.cards.forEach((t, e) => {
       const s = this.doc.createElement("button");
-      s.className = "vexy-vlip__dot", s.type = "button", s.setAttribute("aria-label", `Step ${e + 1}`), s.addEventListener("click", () => this.goToSegment(e)), this._dots.appendChild(s);
+      s.className = "vexy-vlip__dot", s.type = "button", s.setAttribute("aria-label", `Step ${e + 1}`), s.addEventListener("click", () => this.goToSegment(e), { signal: this._ac.signal }), this._dots.appendChild(s);
     }));
   }
   // ---- events ------------------------------------------------------------
   _wireEvents() {
-    const t = this.video;
-    this._onLoaded = () => this._onMeta(), this._onEnded = () => this._handleEnded(), this._onPlay = () => this._reflect(), this._onPause = () => this._reflect(), this._onSeeked = () => this._updateUi(), t.addEventListener("loadedmetadata", this._onLoaded), t.addEventListener("ended", this._onEnded), t.addEventListener("play", this._onPlay), t.addEventListener("pause", this._onPause), t.addEventListener("seeked", this._onSeeked), this._onTap = (e) => {
-      this._mode === "stepped" ? this.toggle() : this.toggle(), e.preventDefault();
-    }, this.tap.addEventListener("click", this._onTap), this._onCardClick = (e) => {
-      const s = e.target;
-      s && (s.closest("a") || s.closest("button:not(.vexy-vlip__tap)")) || this._mode === "stepped" && this.toggle();
-    }, this.cardsLayer.addEventListener("click", this._onCardClick), this.opts.keyboard && (this._onKey = (e) => this._handleKey(e), this.root.addEventListener("keydown", this._onKey));
+    const t = this.video, e = { signal: this._ac.signal };
+    t.addEventListener("loadedmetadata", () => this._onMeta(), e), t.addEventListener("ended", () => this._handleEnded(), e), t.addEventListener("play", () => this._reflect(), e), t.addEventListener("pause", () => this._reflect(), e), t.addEventListener("seeked", () => this._updateUi(), e), this.tap.addEventListener("click", (s) => {
+      this.toggle(), s.preventDefault();
+    }, e), this.cardsLayer.addEventListener("click", (s) => {
+      const n = s.target;
+      n && (n.closest("a") || n.closest("button:not(.vexy-vlip__tap)")) || this._mode === "stepped" && this.toggle();
+    }, e), this.opts.keyboard && this.root.addEventListener("keydown", (s) => this._handleKey(s), e);
   }
   _handleKey(t) {
     switch (t.key) {
@@ -485,7 +507,7 @@ class C {
         this._emit("error", { error: e, phase: "track" });
         return;
       }
-    this._destroyed || (t && (this.cards = j(t, { enter: "fade" }), this.stops = q(this.cards), this.layer.setCards(this.cards), this._buildDots()), this._cardsReady = !0, this._maybeReady());
+    this._destroyed || (t && (this.cards = q(t, { enter: "fade" }), this.stops = U(this.cards), this.layer.setCards(this.cards), this._buildDots()), this._cardsReady = !0, this._maybeReady());
   }
   _onMeta() {
     this._metaReady = !0, this._maybeReady();
@@ -494,14 +516,14 @@ class C {
     if (this._ready || this._destroyed || !this._metaReady || !this._cardsReady) return;
     this._ready = !0;
     const t = this.opts.startSegment;
-    t != null && this.cards[t] ? (this._stepIndex = t, this.video.currentTime = this.cards[t].start, this._mode === "stepped" && this.layer.show(t)) : this.opts.startAt && (this.video.currentTime = this.opts.startAt, this._stepIndex = f(this.cards, this.opts.startAt)), this._updateUi(), this._emit("ready", { segments: this.cards.length }), this._mode === "continuous" && this.opts.autoplay ? this.play() : this._showHint(this._mode === "stepped");
+    t != null && this.cards[t] ? (this._stepIndex = t, this.video.currentTime = this.cards[t].start, this._mode === "stepped" && this.layer.show(t)) : this.opts.startAt && (this.video.currentTime = this.opts.startAt, this._stepIndex = v(this.cards, this.opts.startAt)), this._updateUi(), this._emit("ready", { segments: this.cards.length }), this._mode === "continuous" && this.opts.autoplay ? this.play() : this._showHint(this._mode === "stepped");
   }
   // ---- frame watcher -----------------------------------------------------
   _startLoop() {
     this._looping || (this._looping = !0, this._scheduleTick());
   }
   _scheduleTick() {
-    if (this._destroyed) return;
+    if (this._destroyed || this._frame != null) return;
     const t = this.video, e = () => this._tick();
     typeof t.requestVideoFrameCallback == "function" ? (this._frame = t.requestVideoFrameCallback(e), this._frameKind = "rvfc") : (this._frame = requestAnimationFrame(e), this._frameKind = "raf");
   }
@@ -511,12 +533,12 @@ class C {
     this._frameKind === "rvfc" && typeof t.cancelVideoFrameCallback == "function" ? t.cancelVideoFrameCallback(this._frame) : this._frameKind === "raf" && cancelAnimationFrame(this._frame), this._frame = null;
   }
   _tick() {
-    if (this._destroyed) return;
+    if (this._frame = null, this._destroyed) return;
     const t = this.video, e = t.currentTime;
     if (this._mode === "stepped" && this._target != null)
       e + m >= this._target && this._reachStop(this._pendingSeg);
     else if (this._mode === "continuous") {
-      const s = U(this.cards, e);
+      const s = V(this.cards, e);
       s !== this.layer.activeIndex && (s === -1 ? (this.layer.hide(), this._emit("cardhide", {})) : (this.layer.show(s), this._emit("segmententer", { index: s, segment: this.cards[s] }), this._emit("cardshow", { index: s, segment: this.cards[s] })));
     }
     this._updateUi(), !t.paused && !this._destroyed ? this._scheduleTick() : this._looping = !1;
@@ -535,7 +557,7 @@ class C {
       this._target = null, this._pendingSeg = -1, this._playingToEnd = !0, this._playNative();
     else {
       const s = this.cards[e].start;
-      this._playingToEnd = !1, this.opts.easing !== "linear" && y[this.opts.easing] ? this._travelEased(t, s, e) : (this._target = s, this._pendingSeg = e, this._playNative());
+      this._playingToEnd = !1, this.opts.easing !== "linear" && g[this.opts.easing] ? this._travelEased(t, s, e) : (this._target = s, this._pendingSeg = e, this._playNative());
     }
     this._emit("play", {});
   }
@@ -546,16 +568,16 @@ class C {
   }
   _travelEased(t, e, s) {
     this._cancelEase(), this.video.pause();
-    const r = y[this.opts.easing] || y.linear, a = this.video.playbackRate || 1, n = Math.max(0, e - t) / a * 1e3, o = this.video.muted;
+    const n = g[this.opts.easing] || g.linear, r = this.video.playbackRate || 1, a = Math.max(0, e - t) / r * 1e3, o = this.video.muted;
     this.video.muted = !0;
-    const l = typeof performance < "u" ? performance.now() : Date.now(), d = { segIndex: s, wasMuted: o, raf: 0 };
-    this._ease = d;
+    const d = typeof performance < "u" ? performance.now() : Date.now(), l = { segIndex: s, wasMuted: o, raf: 0 };
+    this._ease = l;
     const h = () => {
-      if (this._destroyed || this._ease !== d) return;
-      const _ = typeof performance < "u" ? performance.now() : Date.now(), p = n <= 0 ? 1 : Math.min(1, (_ - l) / n);
-      this.video.currentTime = t + (e - t) * r(p), this._updateUi(), p >= 1 ? (this.video.muted = o, this._ease = null, this._reachStop(s)) : d.raf = requestAnimationFrame(h);
+      if (this._destroyed || this._ease !== l) return;
+      const _ = typeof performance < "u" ? performance.now() : Date.now(), p = a <= 0 ? 1 : Math.min(1, (_ - d) / a);
+      this.video.currentTime = t + (e - t) * n(p), this._updateUi(), p >= 1 ? (this.video.muted = o, this._ease = null, this._reachStop(s)) : l.raf = requestAnimationFrame(h);
     };
-    d.raf = requestAnimationFrame(h);
+    l.raf = requestAnimationFrame(h);
   }
   _cancelEase() {
     this._ease && (cancelAnimationFrame(this._ease.raf), this._ease.wasMuted != null && (this.video.muted = this._ease.wasMuted), this._ease = null);
@@ -577,7 +599,7 @@ class C {
     if (this._mode === "stepped")
       this._advance();
     else {
-      const t = V(this.cards, this.video.currentTime);
+      const t = P(this.cards, this.video.currentTime);
       t >= 0 && this.seekTo(this.cards[t].start);
     }
   }
@@ -587,7 +609,7 @@ class C {
       this.goToSegment(Math.max(0, e));
       return;
     }
-    const t = K(this.cards, this.video.currentTime);
+    const t = Y(this.cards, this.video.currentTime);
     this.goToSegment(t >= 0 ? t : 0);
   }
   seekTo(t) {
@@ -608,20 +630,21 @@ class C {
   }
   setMode(t) {
     const e = t === "stepped" ? "stepped" : "continuous";
-    e !== this._mode && (this._mode = e, this.root.dataset.mode = e, this._cancelEase(), this._target = null, this._stepIndex = this.layer.activeIndex >= 0 ? this.layer.activeIndex : f(this.cards, this.video.currentTime), this.video.pause(), this.layer.hide(), this._showHint(e === "stepped"), this._emit("modechange", { mode: e }));
+    e !== this._mode && (this._mode = e, this.root.dataset.mode = e, this._cancelEase(), this._target = null, this._stepIndex = this.layer.activeIndex >= 0 ? this.layer.activeIndex : v(this.cards, this.video.currentTime), this.video.loop = !!this.opts.loop && e !== "stepped", this.video.pause(), this.layer.hide(), this._showHint(e === "stepped"), this._emit("modechange", { mode: e }));
   }
   setEasing(t) {
-    y[t] && (this.opts.easing = t);
+    g[t] && (this.opts.easing = t);
   }
   destroy() {
-    this._destroyed = !0, this._stopLoop(), this._cancelEase();
-    const t = this.video;
-    t.removeEventListener("loadedmetadata", this._onLoaded), t.removeEventListener("ended", this._onEnded), t.removeEventListener("play", this._onPlay), t.removeEventListener("pause", this._onPause), t.removeEventListener("seeked", this._onSeeked), this.tap.removeEventListener("click", this._onTap), this.cardsLayer.removeEventListener("click", this._onCardClick), this._onKey && this.root.removeEventListener("keydown", this._onKey);
+    this._destroyed = !0, this._stopLoop(), this._cancelEase(), this._ac.abort();
     try {
-      t.pause();
+      this.video.pause();
     } catch {
     }
-    this.layer.clear(), this._emit("destroy", {});
+    this.layer.clear();
+    for (const t of [this.tap, this.cardsLayer, this.hint, this._controlsBar])
+      t?.remove();
+    this._emit("destroy", {});
   }
   // ---- helpers -----------------------------------------------------------
   _handleEnded() {
@@ -642,8 +665,8 @@ class C {
     this.root.dataset.paused = String(t), this._playBtn && (this._playBtn.textContent = t ? c.play : c.pause), t || this._startLoop();
   }
   _updateUi() {
-    if (this._reflect(), this._time && (this._time.textContent = `${T(this.video.currentTime)} / ${T(this.video.duration)}`), this._dots) {
-      const t = this.layer.activeIndex >= 0 ? this.layer.activeIndex : f(this.cards, this.video.currentTime), e = this._dots.children;
+    if (this._reflect(), this._time && (this._time.textContent = `${C(this.video.currentTime)} / ${C(this.video.duration)}`), this._dots) {
+      const t = this.layer.activeIndex >= 0 ? this.layer.activeIndex : v(this.cards, this.video.currentTime), e = this._dots.children;
       for (let s = 0; s < e.length; s++)
         e[s].classList.toggle("vexy-vlip__dot--active", s === t);
     }
@@ -651,15 +674,17 @@ class C {
   _emit(t, e) {
     const s = new CustomEvent(`vexyvlip:${t}`, { detail: e, bubbles: !0, composed: !0 });
     this.root.dispatchEvent(s);
-    const r = this.opts[`on${t[0].toUpperCase()}${t.slice(1)}`];
-    typeof r == "function" && r(e, this);
+    const n = this.opts[`on${t[0].toUpperCase()}${t.slice(1)}`];
+    typeof n == "function" && n(e, this);
   }
   // ---- getters -----------------------------------------------------------
   get segments() {
-    return this.cards.map((t) => ({ ...t }));
+    return this.cards.map(
+      (t) => typeof structuredClone == "function" ? structuredClone(t) : JSON.parse(JSON.stringify(t))
+    );
   }
   get currentSegment() {
-    return this.layer.activeIndex >= 0 ? this.layer.activeIndex : f(this.cards, this.video.currentTime);
+    return this.layer.activeIndex >= 0 ? this.layer.activeIndex : v(this.cards, this.video.currentTime);
   }
   get currentTime() {
     return this.video.currentTime;
@@ -677,12 +702,12 @@ class C {
     return this._ready;
   }
 }
-function T(i) {
+function C(i) {
   if (!Number.isFinite(i)) return "0:00";
   const t = Math.floor(i / 60), e = Math.floor(i % 60);
   return `${t}:${String(e).padStart(2, "0")}`;
 }
-function tt(i) {
+function et(i) {
   const t = document.createElement("div");
   return t.innerHTML = i, t.querySelectorAll("script, style, iframe, object, embed").forEach((e) => e.remove()), t.querySelectorAll("*").forEach((e) => {
     [...e.attributes].forEach((s) => {
@@ -695,7 +720,7 @@ function u(i, t, e) {
   const s = i.getAttribute(t);
   return s !== "false" && s !== "0";
 }
-function N(i) {
+function T(i) {
   return {
     src: i.getAttribute("src") || "",
     track: i.getAttribute("track") || "",
@@ -715,19 +740,19 @@ function N(i) {
     injectStyles: !1
   };
 }
-class et extends HTMLElement {
+class it extends HTMLElement {
   static get observedAttributes() {
     return ["src", "track", "vtt", "mode", "easing", "poster", "muted", "loop", "controls"];
   }
   constructor() {
     super(), this._shadow = this.attachShadow({ mode: "open" });
     const t = document.createElement("style");
-    t.textContent = X(), this._shadow.appendChild(t), this._mount = document.createElement("div"), this._shadow.appendChild(this._mount);
+    t.textContent = Q(), this._shadow.appendChild(t), this._mount = document.createElement("div"), this._shadow.appendChild(this._mount);
   }
   connectedCallback() {
     if (this._vlip) return;
     const t = this.querySelector("video");
-    t && this._mount.appendChild(t), this._vlip = new C(t || this._mount, N(this));
+    t && this._mount.appendChild(t), this._vlip = new N(t || this._mount, T(this));
   }
   disconnectedCallback() {
     this._vlip?.destroy(), this._vlip = null;
@@ -745,18 +770,21 @@ class et extends HTMLElement {
           this._vlip.video.muted = u(this, "muted", !1);
           break;
         case "loop":
-          this._vlip.video.loop = u(this, "loop", !1);
+          this._vlip.video.loop = u(this, "loop", !1) && this._vlip.mode !== "stepped";
           break;
+        case "poster":
+          this._vlip.video.poster = s || "";
+          break;
+        case "controls":
         case "src":
         case "track":
         case "vtt":
-        case "poster":
           this._rebuild();
           break;
       }
   }
   _rebuild() {
-    this._vlip?.destroy(), this._mount.replaceChildren(), this._vlip = new C(this._mount, N(this));
+    this._vlip?.destroy(), this._mount.replaceChildren(), this._vlip = new N(this._mount, T(this));
   }
   // ---- delegated API ----
   play() {
@@ -823,10 +851,10 @@ class et extends HTMLElement {
     return this._vlip?.ready ?? !1;
   }
 }
-typeof customElements < "u" && !customElements.get("vexy-vlip") && customElements.define("vexy-vlip", et);
+typeof customElements < "u" && !customElements.get("vexy-vlip") && customElements.define("vexy-vlip", it);
 export {
-  C as VexyVlip,
-  et as VexyVlipElement,
-  et as default
+  N as VexyVlip,
+  it as VexyVlipElement,
+  it as default
 };
 //# sourceMappingURL=vexy-vlip.element.js.map

@@ -95,6 +95,16 @@ testCase("stepped: prev() returns to the earlier card", async (ctx) => {
   assert.equal(await page.evaluate(() => window.vlip.currentSegment), 1);
 });
 
+testCase("destroy() removes the chrome and leaves no card/control DOM", async (ctx) => {
+  const page = await ctx.newPage();
+  await page.goto(FIXTURE);
+  await waitReady(page);
+  await page.evaluate(() => window.vlip.destroy());
+  assert.equal(await page.locator("#host .vexy-vlip__controls").count(), 0, "control bar removed");
+  assert.equal(await page.locator("#host .vexy-vlip__tap").count(), 0, "tap layer removed");
+  assert.equal(await page.locator("#host .vexy-vlip__cards").count(), 0, "cards layer removed");
+});
+
 // ---- harness ------------------------------------------------------------
 
 async function waitForServer(url, tries = 40) {

@@ -83,12 +83,16 @@ export class VexyVlipElement extends HTMLElement {
         this._vlip.video.muted = boolAttr(this, "muted", false);
         break;
       case "loop":
-        this._vlip.video.loop = boolAttr(this, "loop", false);
+        this._vlip.video.loop = boolAttr(this, "loop", false) && this._vlip.mode !== "stepped";
         break;
+      case "poster":
+        // Cosmetic — apply live, no need to tear down playback.
+        this._vlip.video.poster = newVal || "";
+        break;
+      case "controls":
       case "src":
       case "track":
       case "vtt":
-      case "poster":
         // Structural change: rebuild the player.
         this._rebuild();
         break;

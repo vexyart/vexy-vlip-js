@@ -94,6 +94,13 @@ test("renderMarkdown italics", () => {
   assert.ok(renderMarkdown("an *italic* word").includes("<em>italic</em>"));
 });
 
+test("renderMarkdown italic does not eat the preceding character", () => {
+  // The old (^|[^*]) form swallowed the leading char; lookarounds must not.
+  assert.equal(renderMarkdown("a*b*c"), "a<em>b</em>c");
+  // Bold is not mangled by the italic pass.
+  assert.equal(renderMarkdown("**bold**"), "<strong>bold</strong>");
+});
+
 test("tryParseJson returns null for plain text and bad JSON", () => {
   assert.equal(tryParseJson("just text"), null);
   assert.equal(tryParseJson("{ not json"), null);

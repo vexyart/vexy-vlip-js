@@ -132,6 +132,8 @@ A cue whose trimmed payload starts with `{` is parsed as a JSON card. All fields
 
 When `x`/`y`/`w` are absent, placement falls back to the cue's native `position`/`line`/`size` settings, then to the player default (bottom-center, `y: 86%`).
 
+> **Security note.** Plain-text and JSON `text` cards are always HTML-escaped. A JSON `html` card is inserted as-is; `sanitize: true` strips `<script>`/`<style>`/`<iframe>`/`<object>`/`<embed>`, `on*` handlers and `javascript:` URLs, but it is a convenience filter, **not** a hardened sanitizer (it does not cover `data:` URLs, `srcdoc`, SVG `<use>`, `formaction`, CSS `url()`, etc.). Treat the WebVTT file as trusted, author-controlled content. For untrusted input, sanitize upstream with a vetted library (e.g. DOMPurify).
+
 ## Options
 
 | Option | Type | Default | Notes |
@@ -216,8 +218,8 @@ When `keyboard: true` (default): `Space` / `Enter` — advance or toggle, `→` 
 ```bash
 npm run dev          # Vite dev server
 npm run build        # -> dist/vexy-vlip.element.js + dist/vexy-vlip.global.js
-npm run test:unit    # node --test  (18 unit tests, no DOM)
-npm run test:e2e     # node tests/e2e/run-e2e.mjs  (6 Playwright-library checks)
+npm run test:unit    # node --test  (24 unit tests, no DOM)
+npm run test:e2e     # node tests/e2e/run-e2e.mjs  (8 Playwright-library checks)
 npm test             # unit + e2e
 npm run build:docs   # copy bundles into docs/
 ./build.sh           # full production build

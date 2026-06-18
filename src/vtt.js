@@ -114,7 +114,7 @@ export function renderMarkdown(text) {
   let html = escapeHtml(text);
   html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
   html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  html = html.replace(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>");
+  html = html.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, "<em>$1</em>");
   html = html.replace(/\n/g, "<br>");
   return html;
 }
@@ -202,7 +202,7 @@ export function cueToCard(cue, defaults = {}) {
     isHtml: !!(json && typeof json.html === "string"),
     placement: { x, y, w: hasW ? w : null, anchor, align },
     style: {
-      bg: json && (json.bg ?? (json.opacity != null ? null : undefined)),
+      bg: json ? json.bg : undefined,
       fg: json && json.fg,
       font: json && json.font,
       padding: json && json.padding,

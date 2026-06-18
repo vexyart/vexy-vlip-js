@@ -38,6 +38,33 @@ export function applyPlacement(el, p) {
   else el.style.width = "";
 }
 
+/**
+ * Compose an `opacity` (0..1) onto a solid `bg` colour, returning an rgba()
+ * string. Hex (#rgb / #rrggbb) and rgb()/rgba() are supported; anything else
+ * (gradients, named colours) is returned unchanged. With no `bg`, returns
+ * undefined so the themed `--vv-card-bg` is left intact.
+ */
+export function composeBg(bg, opacity) {
+  if (bg == null) return undefined;
+  if (opacity == null || opacity >= 1) return bg;
+  const a = Math.max(0, Math.min(1, Number(opacity)));
+  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(bg.trim());
+  if (hex) {
+    let h = hex[1];
+    if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+  }
+  const rgb = /^rgba?\(([^)]+)\)$/i.exec(bg.trim());
+  if (rgb) {
+    const parts = rgb[1].split(",").map((s) => s.trim()).slice(0, 3);
+    if (parts.length === 3) return `rgba(${parts.join(", ")}, ${a})`;
+  }
+  return bg; // can't compose (gradient / named colour) — leave as-is
+}
+
 /** Apply per-cue inline style overrides onto the inner body element. */
 function applyStyle(body, style, align) {
   if (!style) return;
@@ -47,14 +74,8 @@ function applyStyle(body, style, align) {
   if (style.radius != null) body.style.borderRadius = len(style.radius, "px");
   if (style.border) body.style.border = style.border;
   if (style.shadow) body.style.boxShadow = style.shadow;
-  // Background, optionally with an opacity helper for solid colours.
-  if (style.bg) {
-    body.style.background = style.bg;
-    if (style.opacity != null) body.style.opacity = ""; // opacity handled by --in
-  }
-  if (style.opacity != null && !style.bg) {
-    body.style.background = `rgba(12, 18, 28, ${style.opacity})`;
-  }
+  const bg = composeBg(style.bg, style.opacity);
+  if (bg) body.style.background = bg;
   if (align) body.style.textAlign = align;
 }
 

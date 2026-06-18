@@ -64,7 +64,10 @@ export class VexyVlip {
     this._playingToEnd = false;
     this._ease = null; // active eased-travel state
     this._looping = false;
+    this._frame = null;
     this._mode = this.opts.mode === "stepped" ? "stepped" : "continuous";
+    // One controller for every listener we add, so destroy() is a single abort().
+    this._ac = new AbortController();
 
     this._buildDom(target);
     if (this.opts.injectStyles && !this._inShadow) injectStyles(this.doc);
@@ -99,7 +102,9 @@ export class VexyVlip {
     v.preload = "metadata";
     if (this.opts.src) v.src = this.opts.src;
     if (this.opts.poster) v.poster = this.opts.poster;
-    v.loop = !!this.opts.loop;
+    // Native loop would wedge the stepped engine (no `ended` to reset state),
+    // so it only applies in continuous mode.
+    v.loop = !!this.opts.loop && this._mode !== "stepped";
     v.muted = !!this.opts.muted;
     // We render our own controls; never the native ones.
     v.controls = false;
@@ -151,13 +156,15 @@ export class VexyVlip {
     this._fsBtn = btn(ICONS.fs, "Fullscreen");
 
     bar.append(this._prevBtn, this._playBtn, this._nextBtn, this._dots, this._time, this._muteBtn, this._fsBtn);
+    this._controlsBar = bar;
     this.root.appendChild(bar);
 
-    this._playBtn.addEventListener("click", () => this.toggle());
-    this._prevBtn.addEventListener("click", () => this.prev());
-    this._nextBtn.addEventListener("click", () => this.next());
-    this._muteBtn.addEventListener("click", () => this._toggleMute());
-    this._fsBtn.addEventListener("click", () => this._toggleFullscreen());
+    const sig = { signal: this._ac.signal };
+    this._playBtn.addEventListener("click", () => this.toggle(), sig);
+    this._prevBtn.addEventListener("click", () => this.prev(), sig);
+    this._nextBtn.addEventListener("click", () => this.next(), sig);
+    this._muteBtn.addEventListener("click", () => this._toggleMute(), sig);
+    this._fsBtn.addEventListener("click", () => this._toggleFullscreen(), sig);
   }
 
   _buildDots() {
@@ -168,7 +175,7 @@ export class VexyVlip {
       d.className = "vexy-vlip__dot";
       d.type = "button";
       d.setAttribute("aria-label", `Step ${i + 1}`);
-      d.addEventListener("click", () => this.goToSegment(i));
+      d.addEventListener("click", () => this.goToSegment(i), { signal: this._ac.signal });
       this._dots.appendChild(d);
     });
   }
@@ -177,38 +184,25 @@ export class VexyVlip {
 
   _wireEvents() {
     const v = this.video;
-    this._onLoaded = () => this._onMeta();
-    this._onEnded = () => this._handleEnded();
-    this._onPlay = () => this._reflect();
-    this._onPause = () => this._reflect();
-    this._onSeeked = () => this._updateUi();
-    v.addEventListener("loadedmetadata", this._onLoaded);
-    v.addEventListener("ended", this._onEnded);
-    v.addEventListener("play", this._onPlay);
-    v.addEventListener("pause", this._onPause);
-    v.addEventListener("seeked", this._onSeeked);
+    const sig = { signal: this._ac.signal };
+    v.addEventListener("loadedmetadata", () => this._onMeta(), sig);
+    v.addEventListener("ended", () => this._handleEnded(), sig);
+    v.addEventListener("play", () => this._reflect(), sig);
+    v.addEventListener("pause", () => this._reflect(), sig);
+    v.addEventListener("seeked", () => this._updateUi(), sig);
 
-    this._onTap = (e) => {
-      if (this._mode === "stepped") {
-        this.toggle();
-      } else {
-        this.toggle();
-      }
-      e.preventDefault();
-    };
-    this.tap.addEventListener("click", this._onTap);
+    // Tap layer (stepped) and clicking the video both advance/toggle.
+    this.tap.addEventListener("click", (e) => { this.toggle(); e.preventDefault(); }, sig);
 
     // Clicking a card advances (unless the click landed on a link/button).
-    this._onCardClick = (e) => {
+    this.cardsLayer.addEventListener("click", (e) => {
       const t = e.target;
       if (t && (t.closest("a") || t.closest("button:not(.vexy-vlip__tap)"))) return;
       if (this._mode === "stepped") this.toggle();
-    };
-    this.cardsLayer.addEventListener("click", this._onCardClick);
+    }, sig);
 
     if (this.opts.keyboard) {
-      this._onKey = (e) => this._handleKey(e);
-      this.root.addEventListener("keydown", this._onKey);
+      this.root.addEventListener("keydown", (e) => this._handleKey(e), sig);
     }
   }
 
@@ -298,7 +292,9 @@ export class VexyVlip {
   }
 
   _scheduleTick() {
-    if (this._destroyed) return;
+    // Idempotent: never queue a second handle while one is pending, so rapid
+    // pause/play can't orphan a frame callback that runs forever.
+    if (this._destroyed || this._frame != null) return;
     const v = this.video;
     const cb = () => this._tick();
     if (typeof v.requestVideoFrameCallback === "function") {
@@ -323,6 +319,7 @@ export class VexyVlip {
   }
 
   _tick() {
+    this._frame = null; // the handle that fired is now consumed
     if (this._destroyed) return;
     const v = this.video;
     const t = v.currentTime;
@@ -547,6 +544,7 @@ export class VexyVlip {
     this._stepIndex = this.layer.activeIndex >= 0
       ? this.layer.activeIndex
       : currentStop(this.cards, this.video.currentTime);
+    this.video.loop = !!this.opts.loop && next !== "stepped";
     this.video.pause();
     this.layer.hide();
     this._showHint(next === "stepped");
@@ -561,21 +559,19 @@ export class VexyVlip {
     this._destroyed = true;
     this._stopLoop();
     this._cancelEase();
-    const v = this.video;
-    v.removeEventListener("loadedmetadata", this._onLoaded);
-    v.removeEventListener("ended", this._onEnded);
-    v.removeEventListener("play", this._onPlay);
-    v.removeEventListener("pause", this._onPause);
-    v.removeEventListener("seeked", this._onSeeked);
-    this.tap.removeEventListener("click", this._onTap);
-    this.cardsLayer.removeEventListener("click", this._onCardClick);
-    if (this._onKey) this.root.removeEventListener("keydown", this._onKey);
+    // Removes every listener we added (video, tap, cards, keyboard, controls, dots).
+    this._ac.abort();
     try {
-      v.pause();
+      this.video.pause();
     } catch {
       /* ignore */
     }
     this.layer.clear();
+    // Remove the chrome we created (leave the video element in place; it may
+    // have been supplied by the caller).
+    for (const el of [this.tap, this.cardsLayer, this.hint, this._controlsBar]) {
+      el?.remove();
+    }
     this._emit("destroy", {});
   }
 
@@ -638,7 +634,10 @@ export class VexyVlip {
   // ---- getters -----------------------------------------------------------
 
   get segments() {
-    return this.cards.map((c) => ({ ...c }));
+    // Deep copy so callers can't mutate internal placement/style objects.
+    return this.cards.map((c) =>
+      typeof structuredClone === "function" ? structuredClone(c) : JSON.parse(JSON.stringify(c)),
+    );
   }
   get currentSegment() {
     return this.layer.activeIndex >= 0
