@@ -1,0 +1,12 @@
+WEBVTT
+
+NOTE Regression fixture: the first cue starts at 00:00 — stepped mode must
+NOTE show this card on the first advance rather than skipping to the second.
+
+zero
+00:00.000 --> 00:02.000
+The first card starts at time zero.
+
+one
+00:03.000 --> 00:05.000
+The second card.

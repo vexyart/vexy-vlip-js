@@ -1,0 +1,55 @@
+<!doctype html>
+<!-- this_file: docs/demo-library.html -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vexy Vlip — global script demo</title>
+    <style>
+      body { margin: 0; background: #0a0e14; color: #e9eef6; font: 16px/1.6 system-ui, sans-serif; }
+      .wrap { max-width: 860px; margin: 0 auto; padding: 28px 24px 60px; }
+      a { color: #4ea1ff; }
+      h1 { letter-spacing: -0.02em; }
+      nav { font-size: 14px; margin-bottom: 18px; display: flex; gap: 16px; }
+      #host { width: 100%; border: 1px solid #1f2a3a; border-radius: 14px; overflow: hidden; }
+      pre { background: #0c121c; border: 1px solid #1f2a3a; border-radius: 10px; padding: 16px; overflow: auto; font-size: 13px; }
+      code { font-family: ui-monospace, Menlo, monospace; }
+      .log { color: #9aa7b8; font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <nav><a href="index.html">← Home</a><a href="demo-module.html">ESM</a><a href="demo-component.html">Web Component</a></nav>
+      <h1>Classic global script</h1>
+      <p>No build step. One <code>&lt;script&gt;</code> exposes <code>window.VexyVlip</code> (and registers the element too).</p>
+
+      <div id="host"></div>
+      <p class="log" id="log">Loading…</p>
+
+      <pre><code>&lt;script src="vexy-vlip.global.js"&gt;&lt;/script&gt;
+&lt;div id="host"&gt;&lt;/div&gt;
+&lt;script&gt;
+  const vlip = new VexyVlip(document.getElementById("host"), {
+    src: "media/playlines.mp4",
+    track: "media/playlines.vtt",
+    mode: "continuous",
+    muted: true,
+  });
+&lt;/script&gt;</code></pre>
+    </div>
+
+    <script src="vexy-vlip.global.js"></script>
+    <script>
+      const host = document.getElementById("host");
+      const log = document.getElementById("log");
+      const vlip = new VexyVlip(host, {
+        src: "media/playlines.mp4",
+        track: "media/playlines.vtt",
+        mode: "continuous",
+        muted: true,
+        autoplay: false,
+      });
+      host.addEventListener("vexyvlip:ready", (e) => (log.textContent = `Ready — ${e.detail.segments} cards. Press play; cards appear as the video plays. window.VexyVlip v${VexyVlip.version}.`));
+    </script>
+  </body>
+</html>

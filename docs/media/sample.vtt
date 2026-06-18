@@ -1,0 +1,23 @@
+WEBVTT
+
+NOTE Sample track for tests + demos. Mixes plain-text and JSON card cues.
+
+step-1
+00:02.000 --> 00:03.500
+This is a **plain-text** card near the bottom.
+
+step-2
+00:04.000 --> 00:05.500 position:18% line:30% size:34% align:start
+A card placed top-left via native WebVTT cue settings.
+
+step-3
+00:06.000 --> 00:07.500
+{ "text": "A JSON card with a custom backdrop.", "x": 50, "y": 50, "anchor": "center", "bg": "#10243a", "fg": "#eaf2ff", "radius": 16, "shadow": "0 10px 30px rgba(0,0,0,.5)" }
+
+step-4
+00:08.000 --> 00:09.500
+{ "text": "Use `code` and *emphasis* in cards.", "x": 82, "y": 80, "anchor": "bottom-right" }
+
+step-5
+00:10.000 --> 00:11.500
+The final card — click once more to play to the end.

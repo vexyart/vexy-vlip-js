@@ -1,0 +1,35 @@
+<!doctype html>
+<!-- this_file: tests/fixtures/player.html -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>vexy-vlip e2e fixture</title>
+    <style>
+      body { margin: 0; background: #111; }
+      #host { width: 640px; }
+    </style>
+  </head>
+  <body>
+    <div id="host"></div>
+    <script type="module">
+      import { VexyVlip } from "/src/index.js";
+      const params = new URLSearchParams(location.search);
+      window.__events = [];
+      const host = document.getElementById("host");
+      const vlip = new VexyVlip(host, {
+        src: "/testdata/sample.mp4",
+        track: params.get("track") || "/testdata/sample.vtt",
+        mode: params.get("mode") || "continuous",
+        easing: params.get("easing") || "linear",
+        muted: true,
+        controls: true,
+      });
+      window.vlip = vlip;
+      for (const ev of ["ready", "stop", "cardshow", "cardhide", "segmententer", "ended", "play", "pause"]) {
+        host.addEventListener("vexyvlip:" + ev, (e) => {
+          window.__events.push({ type: ev, detail: e.detail });
+        });
+      }
+    </script>
+  </body>
+</html>

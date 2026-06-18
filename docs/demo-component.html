@@ -1,0 +1,55 @@
+<!doctype html>
+<!-- this_file: docs/demo-component.html -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vexy Vlip — Web Component demo</title>
+    <style>
+      body { margin: 0; background: #0a0e14; color: #e9eef6; font: 16px/1.6 system-ui, sans-serif; }
+      .wrap { max-width: 860px; margin: 0 auto; padding: 28px 24px 60px; }
+      a { color: #4ea1ff; }
+      h1 { letter-spacing: -0.02em; }
+      nav { font-size: 14px; margin-bottom: 18px; display: flex; gap: 16px; }
+      vexy-vlip {
+        display: block; width: 100%; border: 1px solid #1f2a3a; border-radius: 14px; overflow: hidden;
+        /* Theme via CSS custom properties: */
+        --vv-card-bg: rgba(16, 36, 58, 0.92);
+        --vv-accent: #6fd3ff;
+        --vv-card-radius: 16px;
+      }
+      pre { background: #0c121c; border: 1px solid #1f2a3a; border-radius: 10px; padding: 16px; overflow: auto; font-size: 13px; }
+      code { font-family: ui-monospace, Menlo, monospace; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <nav><a href="index.html">← Home</a><a href="demo-module.html">ESM</a><a href="demo-library.html">Global</a></nav>
+      <h1>Web Component</h1>
+      <p>Declarative markup — the element registers itself when the script loads. Theme it with CSS custom properties.</p>
+
+      <vexy-vlip src="media/sample.mp4" track="media/sample.vtt" mode="stepped" easing="ease-in-out" muted></vexy-vlip>
+
+      <pre><code>&lt;!-- Load once; registers &lt;vexy-vlip&gt; --&gt;
+&lt;script src="vexy-vlip.global.js"&gt;&lt;/script&gt;
+&lt;!-- or, with a bundler: import "vexy-vlip-js/element"; --&gt;
+
+&lt;vexy-vlip
+  src="media/sample.mp4"
+  track="media/sample.vtt"
+  mode="stepped"          &lt;!-- or "continuous" --&gt;
+  easing="ease-in-out"
+  muted&gt;
+&lt;/vexy-vlip&gt;
+
+&lt;style&gt;
+  vexy-vlip {
+    --vv-card-bg: rgba(16,36,58,.92);
+    --vv-accent: #6fd3ff;
+    --vv-card-radius: 16px;
+  }
+&lt;/style&gt;</code></pre>
+    </div>
+    <script src="vexy-vlip.global.js"></script>
+  </body>
+</html>

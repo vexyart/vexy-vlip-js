@@ -1,0 +1,145 @@
+<!doctype html>
+<!-- this_file: docs/index.html -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vexy Vlip — interactive explainer video player</title>
+    <meta name="description" content="A single video + WebVTT becomes styled, positioned on-screen cards. Continuous playback or click-to-advance stop-motion. Zero runtime dependencies." />
+    <style>
+      :root {
+        --bg: #0a0e14; --panel: #121925; --ink: #e9eef6; --dim: #9aa7b8;
+        --accent: #4ea1ff; --line: #1f2a3a; --radius: 14px;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--bg); color: var(--ink);
+        font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      a { color: var(--accent); }
+      header.site { padding: 18px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--line); }
+      header.site .brand { font-weight: 800; letter-spacing: -0.02em; font-size: 18px; }
+      header.site nav { margin-left: auto; display: flex; gap: 18px; font-size: 14px; }
+      .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+      .hero { text-align: center; padding: 56px 0 28px; }
+      .hero h1 { font-size: clamp(32px, 6vw, 56px); margin: 0 0 12px; letter-spacing: -0.03em; line-height: 1.05; }
+      .hero p.lede { font-size: clamp(17px, 2.4vw, 21px); color: var(--dim); max-width: 720px; margin: 0 auto 8px; }
+      .badge { display: inline-block; font-size: 12px; color: var(--dim); border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; margin-top: 10px; }
+      .stage { margin: 28px auto; max-width: 1000px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); box-shadow: 0 24px 60px rgba(0,0,0,.5); }
+      vexy-vlip { width: 100%; display: block; --vv-accent: var(--accent); }
+      .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin: 14px 0 4px; }
+      .controls .group { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+      .controls button { appearance: none; border: 0; background: transparent; color: var(--ink); padding: 9px 14px; cursor: pointer; font-size: 14px; }
+      .controls button[aria-pressed="true"] { background: var(--accent); color: #04121f; font-weight: 600; }
+      .controls .hint { color: var(--dim); font-size: 13px; }
+      section { padding: 40px 0; border-top: 1px solid var(--line); }
+      h2 { font-size: 26px; letter-spacing: -0.02em; }
+      .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+      .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+      .card h3 { margin: 0 0 6px; font-size: 17px; }
+      .card p { margin: 0; color: var(--dim); font-size: 14px; }
+      .ways a.card { text-decoration: none; color: inherit; transition: border-color .2s, transform .2s; display: block; }
+      .ways a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+      .ways .tag { font-size: 12px; color: var(--accent); }
+      pre { background: #0c121c; border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow:auto; font-size: 13px; }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+      footer { padding: 40px 24px 60px; color: var(--dim); text-align: center; border-top: 1px solid var(--line); font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <header class="site">
+      <span class="brand">Vexy&nbsp;Vlip</span>
+      <nav>
+        <a href="demo-module.html">ESM</a>
+        <a href="demo-component.html">Web Component</a>
+        <a href="demo-library.html">Global</a>
+        <a href="https://github.com/vexyart/vexy-vlip-js">GitHub</a>
+      </nav>
+    </header>
+
+    <div class="wrap">
+      <div class="hero">
+        <h1>Your video already knows what to say.</h1>
+        <p class="lede">Vexy Vlip treats a WebVTT track not as subtitles but as <strong>on-screen cards</strong> — styled, positioned, and timed. Play straight through, or click to step from one explanation to the next.</p>
+        <span class="badge">Zero runtime dependencies · ESM · Web Component · &lt;9&nbsp;kB gzipped</span>
+      </div>
+
+      <div class="stage">
+        <vexy-vlip id="hero" src="media/playlines.mp4" track="media/playlines.vtt" mode="stepped" muted></vexy-vlip>
+      </div>
+      <div class="controls">
+        <span class="hint">Mode:</span>
+        <div class="group" id="mode">
+          <button data-mode="stepped" aria-pressed="true">Stop-motion</button>
+          <button data-mode="continuous" aria-pressed="false">Continuous</button>
+        </div>
+        <span class="hint">Travel:</span>
+        <div class="group" id="easing">
+          <button data-ease="linear" aria-pressed="true">Linear</button>
+          <button data-ease="ease-in-out" aria-pressed="false">Eased</button>
+        </div>
+        <button class="group" id="restart" style="padding:9px 14px;cursor:pointer">↺ Restart</button>
+      </div>
+      <p class="controls hint">In stop-motion mode, click the video (or press Space) to advance to the next card. This is the real <a href="https://playlines.vexy.art/">Vexy Playlines</a> editor, captured and narrated with one <code>.vtt</code> file.</p>
+    </div>
+
+    <div class="wrap">
+      <section>
+        <h2>What it does</h2>
+        <div class="grid">
+          <div class="card"><h3>Cards, not captions</h3><p>WebVTT cues render as real HTML panels — solid or translucent backdrops, custom fonts, colours, radius, borders, shadows. Crisp, accessible, responsive.</p></div>
+          <div class="card"><h3>Placed where you mean</h3><p>Use native WebVTT position/line/size hints, or put JSON in the cue payload for exact <code>x/y/w</code> and anchor control.</p></div>
+          <div class="card"><h3>Stop-motion tutorials</h3><p>Play to the next cue, pause, show the card; click to continue. Perfect for explainers and product walk-throughs.</p></div>
+          <div class="card"><h3>Optional eased travel</h3><p>Glide between stops with an ease-in-out curve — no MediaBunny, no WebCodecs, just native seeking.</p></div>
+          <div class="card"><h3>Three builds, one core</h3><p>Import the ESM module, drop in the <code>&lt;vexy-vlip&gt;</code> element, or load one global script. Same engine underneath.</p></div>
+          <div class="card"><h3>Themeable</h3><p>Every knob is a CSS custom property (<code>--vv-card-bg</code>, <code>--vv-accent</code>…). Style it to match your site.</p></div>
+        </div>
+      </section>
+
+      <section class="ways">
+        <h2>Three ways to use it</h2>
+        <div class="grid">
+          <a class="card" href="demo-module.html"><span class="tag">ESM</span><h3>JavaScript module</h3><p><code>import { VexyVlip } from "vexy-vlip-js"</code> and instantiate against any container.</p></a>
+          <a class="card" href="demo-component.html"><span class="tag">HTML</span><h3>Web Component</h3><p>Just write <code>&lt;vexy-vlip src track mode&gt;</code>. It registers itself.</p></a>
+          <a class="card" href="demo-library.html"><span class="tag">SCRIPT</span><h3>Classic global</h3><p>One <code>&lt;script&gt;</code> tag exposes <code>window.VexyVlip</code> for no-build pages.</p></a>
+        </div>
+      </section>
+
+      <section>
+        <h2>The whole tutorial is one file</h2>
+        <p style="color:var(--dim)">Timing, text, placement and style live together in the WebVTT track:</p>
+        <pre><code>WEBVTT
+
+00:02.000 --&gt; 00:03.500 position:18% line:30% size:34% align:start
+A plain card, placed with native WebVTT cue settings.
+
+00:06.000 --&gt; 00:07.500
+{ "text": "A JSON card with a custom backdrop.",
+  "x": 50, "y": 50, "anchor": "center",
+  "bg": "#10243a", "fg": "#eaf2ff", "radius": 16 }</code></pre>
+      </section>
+    </div>
+
+    <footer>
+      Vexy Vlip · Apache-2.0 · <a href="https://github.com/vexyart/vexy-vlip-js">github.com/vexyart/vexy-vlip-js</a> · part of the <a href="https://vexy.art/">Vexy</a> family
+    </footer>
+
+    <script src="vexy-vlip.global.js"></script>
+    <script>
+      const hero = document.getElementById("hero");
+      function setPressed(group, attr, val) {
+        for (const b of document.getElementById(group).querySelectorAll("button"))
+          b.setAttribute("aria-pressed", String(b.dataset[attr] === val));
+      }
+      document.getElementById("mode").addEventListener("click", (e) => {
+        const b = e.target.closest("button"); if (!b) return;
+        hero.setMode(b.dataset.mode); setPressed("mode", "mode", b.dataset.mode);
+      });
+      document.getElementById("easing").addEventListener("click", (e) => {
+        const b = e.target.closest("button"); if (!b) return;
+        hero.setEasing(b.dataset.ease); setPressed("easing", "ease", b.dataset.ease);
+      });
+      document.getElementById("restart").addEventListener("click", () => hero.goToSegment(0));
+    </script>
+  </body>
+</html>

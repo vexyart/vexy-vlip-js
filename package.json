@@ -1,0 +1,61 @@
+{
+  "name": "vexy-vlip-js",
+  "version": "0.1.0",
+  "description": "Interactive explainer video player: a single video + WebVTT becomes styled, positioned on-screen cards with continuous and click-to-advance stop-motion modes. Ships as ESM, Web Component, and a classic-script global. Zero runtime dependencies.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./element": "./src/element.js",
+    "./styles": "./src/styles.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "SPEC.md"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "VEXY_BUILD=element vite build && VEXY_BUILD=global vite build",
+    "preview": "vite preview",
+    "test:unit": "node --test",
+    "test:e2e": "node tests/e2e/run-e2e.mjs",
+    "test": "npm run test:unit && npm run test:e2e",
+    "build:docs": "node scripts/build-docs.mjs"
+  },
+  "keywords": [
+    "video",
+    "webvtt",
+    "subtitles",
+    "captions",
+    "tutorial",
+    "explainer",
+    "interactive-video",
+    "web-component",
+    "stop-motion",
+    "vexy-vlip"
+  ],
+  "author": "Adam Twardoch <adam+npm@twardoch.com> (https://twardoch.github.io/)",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vexyart/vexy-vlip-js.git"
+  },
+  "homepage": "https://vexy.dev/vexy-vlip-js/",
+  "bugs": {
+    "url": "https://github.com/vexyart/vexy-vlip-js/issues"
+  },
+  "sideEffects": [
+    "./src/element.js",
+    "./src/global.js"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1",
+    "vite": "^7.1.12"
+  }
+}

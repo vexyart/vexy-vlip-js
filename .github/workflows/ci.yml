@@ -1,0 +1,26 @@
+# this_file: .github/workflows/ci.yml
+# Unit tests, build, and browser e2e on every push / PR.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci || npm install
+      - name: Unit tests
+        run: npm run test:unit
+      - name: Build bundles
+        run: npm run build
+      - name: Install Chromium for e2e
+        run: npx playwright install --with-deps chromium
+      - name: E2e (Playwright library)
+        run: npm run test:e2e
