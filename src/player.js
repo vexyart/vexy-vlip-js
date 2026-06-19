@@ -36,13 +36,17 @@ const DEFAULTS = {
   keyboard: true,
   sanitize: false,
   overlay: true, // stepped mode: dim the video behind a resting card
-  nav: true, // stepped mode: in-card Back / Next
+  nav: true, // stepped mode: in-card Next (and Back when `back` is on)
+  back: false, // show the in-card ← Back button (hidden by default)
   counter: false, // show the "n/total" step counter in the card nav
   dots: true, // show the step-dots bar
   closable: true, // stepped mode: show the × that drops to plain video mode
   nextLabel: "Next →",
   prevLabel: "←",
   startLabel: "Start →", // centered CTA shown over the dimmed first frame
+  replayLabel: "Replay ↻", // CTA shown over the dimmed first frame after the video ends
+  title: "", // optional video title (shown in the CTA card + a small top-left bar)
+  titleBar: true, // when a title is set, show the small top-left title during playback
   // Auto-fit: grow cards to fit their text, then scale the whole card down if it
   // still overflows the space the anchor leaves toward the edges.
   autoFit: true,
@@ -55,8 +59,13 @@ const DEFAULTS = {
   nextBg: "", // --vv-next-bg
   nextFg: "", // --vv-next-fg
   nextBorder: "", // --vv-next-border
+  startBg: "", // --vv-start-bg (prominent Start button in the title card)
+  startFg: "", // --vv-start-fg
   font: "", // --vv-card-font
   dim: "", // --vv-overlay-bg; a 0..1 number is read as black at that opacity
+  titleColor: "", // --vv-title-fg (top-left title)
+  titleBg: "", // --vv-title-bg
+  titleSize: "", // --vv-title-size
   injectStyles: true,
 };
 
@@ -160,6 +169,7 @@ export class VexyVlip {
       nav: {
         enabled: !!this.opts.nav,
         counter: this.opts.counter !== false,
+        back: !!this.opts.back,
         nextLabel: this.opts.nextLabel,
         prevLabel: this.opts.prevLabel,
       },
@@ -172,14 +182,40 @@ export class VexyVlip {
 
     if (this.opts.controls) this._buildControls();
 
-    // Start CTA: a prominent button centered over the dimmed first frame, shown
-    // (both modes) until the viewer begins. Appended last so it sits on top.
+    // CTA: a prominent Start (pre-play) / Replay (after end) button centered over
+    // the dimmed frame, both modes. With a title, the button sits in a card under
+    // the title; otherwise it's a bare centered pill. Appended last → on top.
+    this.root.dataset.titled = this.opts.title ? "true" : "false";
+    this.cta = doc.createElement("div");
+    this.cta.className = "vexy-vlip__cta";
+    const panel = doc.createElement("div");
+    panel.className = "vexy-vlip__cta-panel";
+    if (this.opts.title) {
+      const t = doc.createElement("div");
+      t.className = "vexy-vlip__cta-title";
+      t.textContent = this.opts.title;
+      t.setAttribute("role", "heading");
+      t.setAttribute("aria-level", "2");
+      panel.appendChild(t);
+    }
     this.startBtn = doc.createElement("button");
     this.startBtn.className = "vexy-vlip__start";
     this.startBtn.type = "button";
     this.startBtn.textContent = this.opts.startLabel ?? DEFAULTS.startLabel;
-    this.root.appendChild(this.startBtn);
-    this.root.dataset.start = "false";
+    panel.appendChild(this.startBtn);
+    this.cta.appendChild(panel);
+    this.root.appendChild(this.cta);
+    this.root.dataset.cta = "";
+    this.root.dataset.started = "false";
+
+    // Small top-left title shown during playback / while cards rest (when set).
+    if (this.opts.title && this.opts.titleBar) {
+      this.titleBar = doc.createElement("div");
+      this.titleBar.className = "vexy-vlip__titlebar";
+      this.titleBar.textContent = this.opts.title;
+      this.titleBar.setAttribute("aria-hidden", "true");
+      this.root.appendChild(this.titleBar);
+    }
   }
 
   /** Write any provided theme options onto the root as CSS custom properties. */
@@ -193,7 +229,12 @@ export class VexyVlip {
     set("--vv-next-bg", this.opts.nextBg);
     set("--vv-next-fg", this.opts.nextFg);
     set("--vv-next-border", this.opts.nextBorder);
+    set("--vv-start-bg", this.opts.startBg);
+    set("--vv-start-fg", this.opts.startFg);
     set("--vv-card-font", this.opts.font);
+    set("--vv-title-fg", this.opts.titleColor);
+    set("--vv-title-bg", this.opts.titleBg);
+    set("--vv-title-size", this.opts.titleSize);
     if (this.opts.maxWidth) set("--vv-card-max-width", `${Number(this.opts.maxWidth)}%`);
     // `dim` may be a colour or a 0..1 opacity (→ black at that opacity).
     const dim = this.opts.dim;
@@ -261,8 +302,8 @@ export class VexyVlip {
     v.addEventListener("pause", () => this._reflect(), sig);
     v.addEventListener("seeked", () => this._updateUi(), sig);
 
-    // The Start CTA begins playback (both modes).
-    this.startBtn.addEventListener("click", (e) => { e.preventDefault(); this._begin(); }, sig);
+    // The CTA button begins (Start) or restarts (Replay) playback.
+    this.startBtn.addEventListener("click", (e) => { e.preventDefault(); this._onCta(); }, sig);
 
     // Tap layer (stepped) and clicking the video both advance/toggle.
     this.tap.addEventListener("click", (e) => { this.toggle(); e.preventDefault(); }, sig);
@@ -359,15 +400,17 @@ export class VexyVlip {
     this._emit("ready", { segments: this.cards.length });
     if (this._mode === "continuous" && this.opts.autoplay) {
       this._started = true;
+      this.root.dataset.started = "true";
       this.play();
     } else if (startSeg != null && this.cards[startSeg]) {
       // Explicit start segment: open already positioned, no Start gate.
       this._started = true;
+      this.root.dataset.started = "true";
       this._showHint(this._mode === "stepped");
     } else {
       // The very beginning: dim the first frame and show the Start CTA (both modes).
       this._primeFirstFrame();
-      this._showStart(true);
+      this._showCta("start");
     }
   }
 
@@ -385,20 +428,30 @@ export class VexyVlip {
     if (this._started || this.opts.autoplay) return;
     if (this.opts.startAt || this.opts.startSegment != null) return;
     if (v.currentTime > 0.01) return;
+    this._seekToPaint(0.042);
+    // If metadata is in but the frame pipeline isn't ready, retry once more data
+    // is available — but only while still parked on the Start CTA, so a late
+    // loadeddata can't yank the playhead back after the viewer has begun.
+    v.addEventListener("loadeddata", () => {
+      if (!this._started && v.currentTime < 0.05) this._seekToPaint(0.042);
+    }, { once: true, signal: this._ac.signal });
+  }
+
+  /**
+   * Seek to a tiny offset to force the browser to decode + present that frame
+   * (Safari paints nothing at a freshly-loaded `currentTime`). Shared by the
+   * Start screen (first frame) and Replay (back to the first frame after end).
+   */
+  _seekToPaint(t) {
+    const v = this.video;
+    if (this._destroyed) return;
     const dur = Number.isFinite(v.duration) ? v.duration : 0;
-    const t = dur > 0 ? Math.min(0.042, Math.max(0, dur - 0.01)) : 0.042;
-    const seek = () => {
-      if (this._destroyed) return;
-      try {
-        v.currentTime = t;
-      } catch {
-        /* not seekable yet — loadeddata will retry */
-      }
-    };
-    seek();
-    // If metadata is in but the frame pipeline isn't ready, retry once a frame
-    // (or more data) is available.
-    v.addEventListener("loadeddata", seek, { once: true, signal: this._ac.signal });
+    const tt = dur > 0 ? Math.min(t, Math.max(0, dur - 0.01)) : t;
+    try {
+      v.currentTime = tt;
+    } catch {
+      /* not seekable yet */
+    }
     if (typeof v.requestVideoFrameCallback === "function") {
       try {
         v.requestVideoFrameCallback(() => {});
@@ -577,7 +630,7 @@ export class VexyVlip {
   // ---- public API --------------------------------------------------------
 
   play() {
-    if (!this._started && this._ready) { this._begin(); return; }
+    if (this.root.dataset.cta && this._ready) { this._onCta(); return; }
     if (this._mode === "stepped") this._advance();
     else this._playNative();
   }
@@ -591,7 +644,7 @@ export class VexyVlip {
   }
 
   toggle() {
-    if (!this._started && this._ready) { this._begin(); return; }
+    if (this.root.dataset.cta && this._ready) { this._onCta(); return; }
     if (this._mode === "stepped") {
       if (!this.video.paused || this._ease) this.pause();
       else this._advance();
@@ -602,7 +655,7 @@ export class VexyVlip {
   }
 
   next() {
-    if (!this._started && this._ready) { this._begin(); return; }
+    if (this.root.dataset.cta && this._ready) { this._onCta(); return; }
     if (this._mode === "stepped") {
       this._advance();
     } else {
@@ -631,9 +684,10 @@ export class VexyVlip {
 
   goToSegment(i) {
     if (!this.cards[i]) return;
-    // Jumping to a step also dismisses the Start CTA.
+    // Jumping to a step also dismisses the Start/Replay CTA.
     this._started = true;
-    this.root.dataset.start = "false";
+    this.root.dataset.started = "true";
+    this.root.dataset.cta = "";
     this._cancelEase();
     this._target = null;
     this._pendingSeg = -1;
@@ -678,6 +732,11 @@ export class VexyVlip {
     this.video.loop = !!this.opts.loop && next !== "stepped";
     this.video.pause();
     this.layer.hide();
+    // Switching into stepped while live: reveal the card we're resting on, so
+    // the viewer isn't left with a dimmed frame and no card.
+    if (next === "stepped" && this._started && this._stepIndex >= 0 && this.cards[this._stepIndex]) {
+      this.layer.show(this._stepIndex);
+    }
     this._showHint(next === "stepped");
     this._emit("modechange", { mode: next });
   }
@@ -686,10 +745,27 @@ export class VexyVlip {
     if (EASE[easing]) this.opts.easing = easing;
   }
 
-  /** Show/hide the Start CTA over a dimmed first frame (both modes). */
-  _showStart(on) {
-    this.root.dataset.start = on ? "true" : "false";
-    if (on) this._setOverlay(true);
+  /**
+   * Show a CTA over a dimmed frame, or hide it. `kind` is "start" (pre-play) or
+   * "replay" (after the video ends); both dim the frame and, when a title is set,
+   * sit in a card under the title. Passing a falsy kind hides the CTA.
+   */
+  _showCta(kind) {
+    this.root.dataset.cta = kind || "";
+    if (this.startBtn) {
+      this.startBtn.textContent = kind === "replay"
+        ? (this.opts.replayLabel ?? DEFAULTS.replayLabel)
+        : (this.opts.startLabel ?? DEFAULTS.startLabel);
+      // A clean accessible name (the visible label may carry → / ↻ glyphs).
+      this.startBtn.setAttribute("aria-label", kind === "replay" ? "Replay" : "Start");
+    }
+    if (kind) this._setOverlay(true);
+  }
+
+  /** Dispatch a CTA click: Start → begin; Replay → restart from the top. */
+  _onCta() {
+    if (this.root.dataset.cta === "replay") this._restart();
+    else this._begin();
   }
 
   /**
@@ -700,13 +776,28 @@ export class VexyVlip {
   _begin() {
     if (this._started || !this._ready) return;
     this._started = true;
-    this.root.dataset.start = "false";
+    this.root.dataset.started = "true";
+    this._showCta(null);
     if (this._mode === "stepped") {
       this._advance();
     } else {
       this._setOverlay(false);
       this._playNative();
     }
+  }
+
+  /** Replay: reset to the very beginning, then begin again (from the Replay CTA). */
+  _restart() {
+    if (!this._ready) return;
+    this._cancelEase();
+    this._target = null;
+    this._pendingSeg = -1;
+    this._stepIndex = -1;
+    this.layer.hide();
+    this.video.currentTime = 0;
+    this._started = false; // let _begin run again
+    this._begin();
+    this._emit("replay", {});
   }
 
   /**
@@ -723,6 +814,11 @@ export class VexyVlip {
     this._emit("close", {});
   }
 
+  /** Restart playback from the very beginning (same as the Replay CTA). */
+  replay() {
+    this._restart();
+  }
+
   destroy() {
     this._destroyed = true;
     this._stopLoop();
@@ -737,7 +833,7 @@ export class VexyVlip {
     this.layer.clear();
     // Remove the chrome we created (leave the video element in place; it may
     // have been supplied by the caller).
-    for (const el of [this.tap, this.overlay, this.cardsLayer, this._controlsBar, this.startBtn]) {
+    for (const el of [this.tap, this.overlay, this.cardsLayer, this._controlsBar, this.cta, this.titleBar]) {
       el?.remove();
     }
     this._emit("destroy", {});
@@ -751,6 +847,12 @@ export class VexyVlip {
     this.layer.hide();
     this._emit("ended", {});
     this._reflect();
+    // Offer a Replay over the dimmed first (or poster/custom) frame — unless the
+    // video loops, in which case it just keeps going.
+    if (!this.video.loop) {
+      this._seekToPaint(0.042);
+      this._showCta("replay");
+    }
   }
 
   _toggleMute() {

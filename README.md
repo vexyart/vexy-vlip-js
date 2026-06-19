@@ -199,8 +199,11 @@ When `x`/`y`/`w` are absent, placement falls back to the cue's native `position`
 | `startSegment` | number | `null` | Start at a segment index |
 | `keyboard` | boolean | `true` | Space/Enter/Arrows/F/M shortcuts |
 | `sanitize` | boolean | `false` | Strip unsafe tags/attrs from `html` cards |
+| `title` | string | `""` | Video title — shown in the Start/Replay card and a small top-left bar during playback |
+| `titleBar` | boolean | `true` | When a title is set, show the small top-left title during playback |
 | `overlay` | boolean | `true` | Dim the video behind a resting card in stepped mode |
-| `nav` | boolean | `true` | Show the in-card **Back / Next** buttons in stepped mode |
+| `nav` | boolean | `true` | Show the in-card **Next** button (and **Back** when `back` is on) in stepped mode |
+| `back` | boolean | `false` | Show the in-card **←** Back button (hidden by default; opt-in) |
 | `closable` | boolean | `true` | Show the in-card **×** that dismisses the cards to plain video mode |
 | `counter` | boolean | `false` | Show the `n/total` step counter in the in-card nav |
 | `dots` | boolean | `true` | Show the step-dots bar |
@@ -209,22 +212,30 @@ When `x`/`y`/`w` are absent, placement falls back to the cue's native `position`
 | `maxWidth` | number | `72` | Card grow cap, as a % of the player width (also sets `--vv-card-max-width`) |
 | `nextLabel` | string | `"Next →"` | Label for the in-card Next button |
 | `prevLabel` | string | `"←"` | Label for the in-card Back button |
-| `startLabel` | string | `"Start →"` | Label for the centered Start button on the dimmed first frame |
+| `startLabel` | string | `"Start →"` | Label for the Start CTA |
+| `replayLabel` | string | `"Replay ↻"` | Label for the Replay CTA (shown after the video ends) |
 | `cardBg` | string | `""` | Card background — sets `--vv-card-bg` |
 | `cardFg` | string | `""` | Card text color — sets `--vv-card-fg` |
 | `nextBg` | string | `""` | Next button background — sets `--vv-next-bg` |
 | `nextFg` | string | `""` | Next button text color — sets `--vv-next-fg` |
 | `nextBorder` | string | `""` | Next button border — sets `--vv-next-border` |
+| `startBg` | string | `""` | Start button background (the prominent CTA in the title card) — sets `--vv-start-bg` |
+| `startFg` | string | `""` | Start button text color — sets `--vv-start-fg` |
+| `titleColor` | string | `""` | Top-left title color — sets `--vv-title-fg` |
+| `titleBg` | string | `""` | Top-left title background — sets `--vv-title-bg` |
+| `titleSize` | string | `""` | Top-left title font size — sets `--vv-title-size` |
 | `font` | string | `""` | Card font — sets `--vv-card-font` |
 | `dim` | string\|number | `""` | Overlay dim — a `0..1` number = black at that opacity; or any CSS color. Sets `--vv-overlay-bg` |
 
 Card text is rendered as a **markdown subset**: headings, ordered/unordered lists, horizontal rules, paragraphs, plus inline `**bold**`, `*italic*`, `` `code` ``, `~~strike~~` and `[links](url)`. Input is HTML-escaped first, so raw HTML never survives (and `javascript:` links are neutralised). The whole card is clickable to advance; the **Next** / **Back** buttons and dots navigate explicitly, and the **×** drops to a plain video player (continuous mode — cards then show only for their cue duration, with no dimming).
 
-**Start screen:** before playback begins, both modes show the dimmed first frame with a prominent, centered **Start →** button (styled like **Next** but 20% larger, placed directly on the frame — no card). Clicking it (or the frame, or pressing Space) begins: stepped mode advances to the first card, continuous mode clears the dim and plays. Skipped when `autoplay` (continuous) or `startSegment` is set.
+**Start / Replay screen:** before playback (and again after the video ends), both modes show the dimmed first frame with a centered CTA — **Start →** to begin, **Replay ↻** to restart. Clicking it (or the frame, or pressing Space) begins/restarts; stepped mode advances to the first card, continuous mode plays through. The Start screen is skipped when `autoplay` (continuous) or `startSegment` is set; Replay is skipped when `loop` is on. The first frame is force-painted under the CTA so Safari/iOS show the real frame, not a blank slate.
+
+**Title:** set `title` to give the video a name. It appears two ways: (1) on the Start/Replay screen the CTA sits in a **card** with the title above the button — there the **Start** button is a prominent filled "primary" (dark ground, light text, settable via `startBg`/`startFg`) while **Replay** stays a low-key outlined pill; (2) during playback / while cards rest, a small **top-left title bar** (themeable via `titleColor`/`titleBg`/`titleSize` or the `--vv-title-*` properties; set `titleBar: false` to hide it).
 
 **Auto-fit:** cards grow up to `maxWidth` to fit the subtitle (the **Next** button never wraps), then — if the content still overflows the space the card's anchor leaves toward the edges — the whole card (text and buttons together) scales down to fit, no smaller than `minScale`. Re-runs on container resize / fullscreen.
 
-Web-component attributes mirror these option names in kebab-case: `nav`, `closable`, `dots`, `counter`, `auto-fit`, `min-scale`, `max-width`, `next-label`, `prev-label`, `start-label`, `card-bg`, `card-fg`, `next-bg`, `next-fg`, `next-border`, `font`, `dim`.
+Web-component attributes mirror these option names in kebab-case: `nav`, `back`, `closable`, `dots`, `counter`, `auto-fit`, `min-scale`, `max-width`, `next-label`, `prev-label`, `start-label`, `replay-label`, `video-title` (or `title`), `title-bar`, `card-bg`, `card-fg`, `next-bg`, `next-fg`, `next-border`, `start-bg`, `start-fg`, `title-color`, `title-bg`, `title-size`, `font`, `dim`.
 
 ## Methods
 
@@ -236,6 +247,7 @@ Web-component attributes mirror these option names in kebab-case: `nav`, `closab
 | `next()` | Jump to the next segment. |
 | `prev()` | Jump to the previous segment. |
 | `close()` | Dismiss the cards: switch to continuous mode and resume playback (no-op in continuous). |
+| `replay()` | Restart playback from the beginning (same as the Replay CTA). |
 | `seekTo(time)` | Seek to an absolute time in seconds. |
 | `goToSegment(i)` | Seek to segment `i` and show its card. |
 | `setMode(mode)` | Switch `"continuous"` / `"stepped"` live. |
@@ -262,6 +274,7 @@ All events dispatch on the container element with the `vexyvlip:` prefix and bub
 | `vexyvlip:cardhide` | `{}` |
 | `vexyvlip:stop` | `{ index }` — stepped mode: reached a stop point |
 | `vexyvlip:close` | `{}` — the × was used to drop to plain video mode |
+| `vexyvlip:replay` | `{}` — the Replay CTA restarted playback from the top |
 | `vexyvlip:error` | `{ error, phase }` |
 
 ## Theming
@@ -283,10 +296,18 @@ All visual knobs are CSS custom properties on `.vexy-vlip` (or `:host` in the we
 | `--vv-next-bg` | `#ffffff` | In-card Next button background (outlined pill by default) |
 | `--vv-next-fg` | `#1d2430` | In-card Next button text color |
 | `--vv-next-border` | `rgba(0,0,0,.82)` | In-card Next button border |
+| `--vv-start-bg` | `#1d2430` | Start button background (prominent CTA in the title card) |
+| `--vv-start-fg` | `#ffffff` | Start button text color |
 | `--vv-close-fg` | `var(--vv-card-fg)` | Close (×) button color |
 | `--vv-dot` | `rgba(255,255,255,.45)` | Step-dot color |
 | `--vv-dot-active` | `var(--vv-accent)` | Active step-dot color |
-| `--vv-overlay-bg` | `rgba(0,0,0,.7)` | Dimming overlay behind a resting card |
+| `--vv-overlay-bg` | `rgba(0,0,0,.7)` | Dimming overlay behind a resting card / CTA |
+| `--vv-title-fg` | `rgba(255,255,255,.92)` | Top-left title color |
+| `--vv-title-bg` | `rgba(0,0,0,.45)` | Top-left title background |
+| `--vv-title-size` | `13px` | Top-left title font size |
+| `--vv-title-padding` | `4px 10px` | Top-left title padding |
+| `--vv-title-radius` | `7px` | Top-left title corner radius |
+| `--vv-title-margin` | `10px 12px` | Top-left title offset from the corner |
 | `--vv-controls-bg` | `rgba(0,0,0,.55)` | Control bar background |
 
 Per-cue JSON fields (`bg`, `fg`, `shadow`, etc.) override these via inline styles on individual cards.

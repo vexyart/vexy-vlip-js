@@ -21,6 +21,8 @@
         track: params.get("track") || "/testdata/sample.vtt",
         mode: params.get("mode") || "continuous",
         easing: params.get("easing") || "linear",
+        title: params.get("title") || "",
+        back: params.has("back") ? params.get("back") !== "false" : undefined,
         muted: true,
         controls: true,
       });

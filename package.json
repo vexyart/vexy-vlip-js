@@ -1,6 +1,6 @@
 {
   "name": "vexy-vlip-js",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Interactive explainer video player: a single video + WebVTT becomes styled, positioned on-screen cards with continuous and click-to-advance stop-motion modes. Ships as ESM, Web Component, and a classic-script global. Zero runtime dependencies.",
   "type": "module",
   "main": "./src/index.js",

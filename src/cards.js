@@ -108,7 +108,7 @@ function applyStyle(body, style, align) {
  * via delegation on the cards layer.
  * @param {Document} doc
  * @param {object} card card model (uses card.index)
- * @param {{total:number, counter?:boolean, nextLabel?:string, prevLabel?:string}} nav
+ * @param {{total:number, counter?:boolean, back?:boolean, nextLabel?:string, prevLabel?:string}} nav
  */
 function createCardNav(doc, card, nav) {
   const foot = doc.createElement("div");
@@ -124,18 +124,21 @@ function createCardNav(doc, card, nav) {
   spacer.className = "vexy-vlip__navspacer";
   foot.appendChild(spacer);
 
-  const prev = doc.createElement("button");
-  prev.type = "button";
-  prev.className = "vexy-vlip__prev";
-  prev.textContent = nav.prevLabel ?? "←";
-  prev.setAttribute("aria-label", "Previous step");
+  // The ← Back button is opt-in (hidden unless `back` is set).
+  if (nav.back) {
+    const prev = doc.createElement("button");
+    prev.type = "button";
+    prev.className = "vexy-vlip__prev";
+    prev.textContent = nav.prevLabel ?? "←";
+    prev.setAttribute("aria-label", "Previous step");
+    foot.appendChild(prev);
+  }
 
   const next = doc.createElement("button");
   next.type = "button";
   next.className = "vexy-vlip__next";
   next.textContent = nav.nextLabel ?? "Next →";
-
-  foot.append(prev, next);
+  foot.appendChild(next);
   return foot;
 }
 

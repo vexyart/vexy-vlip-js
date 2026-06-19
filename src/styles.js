@@ -24,6 +24,8 @@ export const CSS = `
   --vv-next-bg: #ffffff;
   --vv-next-fg: #1d2430;
   --vv-next-border: rgba(0, 0, 0, 0.82);
+  --vv-start-bg: #1d2430;
+  --vv-start-fg: #ffffff;
   --vv-close-fg: var(--vv-card-fg);
   --vv-dot: rgba(255, 255, 255, 0.45);
   --vv-dot-active: var(--vv-accent);
@@ -175,14 +177,49 @@ export const CSS = `
 .vexy-vlip[data-mode="stepped"] .vexy-vlip__card--closable .vexy-vlip__close { display: block; }
 /* Reserve top-right room so the title / first line never slides under the ×. */
 .vexy-vlip[data-mode="stepped"] .vexy-vlip__card--closable .vexy-vlip__body { padding-right: 32px; }
-/* Start CTA: a prominent button centered over the dimmed first frame (both
-   modes), styled like the Next pill but 20% larger. Shown via data-start. */
-.vexy-vlip__start {
+/* CTA: the Start (pre-play) / Replay (after end) screen, centered over the
+   dimmed frame (both modes), shown via data-cta. With a title (data-titled) the
+   button sits in a card under the title; otherwise it's a bare pill. */
+.vexy-vlip__cta {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
   display: none;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+}
+.vexy-vlip[data-cta="start"] .vexy-vlip__cta,
+.vexy-vlip[data-cta="replay"] .vexy-vlip__cta { display: flex; }
+.vexy-vlip__cta-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 80%;
+  max-height: 86%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+.vexy-vlip[data-titled="true"] .vexy-vlip__cta-panel {
+  background: var(--vv-card-bg);
+  color: var(--vv-card-fg);
+  font: var(--vv-card-font);
+  padding: 24px 28px;
+  border-radius: var(--vv-card-radius);
+  box-shadow: var(--vv-card-shadow);
+  text-align: center;
+  gap: 24px;
+}
+.vexy-vlip__cta-title {
+  font-size: 1.45em;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: break-word;
+}
+/* The CTA button. Default (Start): a prominent pill, 20% larger than Next. */
+.vexy-vlip__start {
   appearance: none;
   cursor: pointer;
   font: inherit;
@@ -194,15 +231,51 @@ export const CSS = `
   border-radius: 999px;
   padding: 12px 26px;
   font-size: 1.14em;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
-  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+/* In a title card the Start button is a filled "primary" — dark ground, light
+   text — to stand out on the white card. Set --vv-start-bg / --vv-start-fg. */
+.vexy-vlip[data-titled="true"][data-cta="start"] .vexy-vlip__start {
+  background: var(--vv-start-bg);
+  color: var(--vv-start-fg);
+  border-color: var(--vv-start-bg);
+}
+/* Replay is less prominent: the same outlined pill as the in-card Next button. */
+.vexy-vlip[data-cta="replay"] .vexy-vlip__start {
+  background: var(--vv-next-bg);
+  color: var(--vv-next-fg);
+  border: 1.5px solid var(--vv-next-border);
+  padding: 10px 22px;
+  font-size: 0.95em;
 }
 .vexy-vlip__start:hover {
-  filter: brightness(0.97);
-  transform: translate(-50%, -50%) scale(1.05);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  filter: brightness(0.96);
+  transform: scale(1.04);
 }
-.vexy-vlip[data-start="true"] .vexy-vlip__start { display: block; }
+/* Small top-left title during playback / while cards rest (hidden on the CTA
+   screen, where the title lives in the card). All knobs are themeable. */
+.vexy-vlip__titlebar {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0; /* top-left in LTR, top-right in RTL */
+  margin: var(--vv-title-margin, 10px 12px);
+  max-width: 72%;
+  padding: var(--vv-title-padding, 4px 10px);
+  font-size: var(--vv-title-size, 13px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--vv-title-fg, rgba(255, 255, 255, 0.92));
+  background: var(--vv-title-bg, rgba(0, 0, 0, 0.45));
+  border-radius: var(--vv-title-radius, 7px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 1;
+}
+.vexy-vlip[data-titled="true"][data-started="true"]:not([data-cta="start"]):not([data-cta="replay"]) .vexy-vlip__titlebar { opacity: 1; }
 .vexy-vlip__card--in .vexy-vlip__body { opacity: 1; transform: translateY(0); }
 .vexy-vlip__card[data-enter="slide-up"] .vexy-vlip__body { transform: translateY(14px); }
 .vexy-vlip__card[data-enter="slide-down"] .vexy-vlip__body { transform: translateY(-14px); }
@@ -300,6 +373,13 @@ export const CSS = `
 }
 @media (prefers-reduced-motion: reduce) {
   .vexy-vlip__body { transition: opacity 0.001s; transform: none !important; }
+  .vexy-vlip__start,
+  .vexy-vlip__prev,
+  .vexy-vlip__next,
+  .vexy-vlip__dot { transition: none; }
+  .vexy-vlip__start:hover,
+  .vexy-vlip__prev:hover,
+  .vexy-vlip__next:hover { transform: none; }
 }
 `;
 

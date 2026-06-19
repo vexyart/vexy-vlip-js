@@ -1,112 +1,112 @@
-function T(s) {
-  if (typeof s != "string") return NaN;
-  const t = s.trim().match(/^(?:(\d+):)?(\d{1,2}):(\d{2})(?:[.,](\d{1,3}))?$/);
+function L(i) {
+  if (typeof i != "string") return NaN;
+  const t = i.trim().match(/^(?:(\d+):)?(\d{1,2}):(\d{2})(?:[.,](\d{1,3}))?$/);
   if (!t) return NaN;
-  const [, e, i, r, n] = t;
-  return (e ? Number(e) : 0) * 3600 + Number(i) * 60 + Number(r) + (n ? Number(n.padEnd(3, "0")) / 1e3 : 0);
+  const [, e, s, a, r] = t;
+  return (e ? Number(e) : 0) * 3600 + Number(s) * 60 + Number(a) + (r ? Number(r.padEnd(3, "0")) / 1e3 : 0);
 }
-function z(s) {
+function W(i) {
   const t = {};
-  if (!s) return t;
-  for (const e of s.trim().split(/\s+/)) {
-    const i = e.indexOf(":");
-    if (i <= 0) continue;
-    const r = e.slice(0, i), n = e.slice(i + 1);
-    ["position", "line", "size", "align", "vertical", "region"].includes(r) && (t[r] = n);
+  if (!i) return t;
+  for (const e of i.trim().split(/\s+/)) {
+    const s = e.indexOf(":");
+    if (s <= 0) continue;
+    const a = e.slice(0, s), r = e.slice(s + 1);
+    ["position", "line", "size", "align", "vertical", "region"].includes(a) && (t[a] = r);
   }
   return t;
 }
-const j = /^(\d{1,2}:)?\d{1,2}:\d{2}[.,]\d{1,3}\s*-->\s*(\d{1,2}:)?\d{1,2}:\d{2}[.,]\d{1,3}/;
-function D(s) {
+const P = /^(\d{1,2}:)?\d{1,2}:\d{2}[.,]\d{1,3}\s*-->\s*(\d{1,2}:)?\d{1,2}:\d{2}[.,]\d{1,3}/;
+function j(i) {
   const t = [];
-  if (typeof s != "string") return t;
-  const i = s.replace(/^﻿/, "").replace(/\r\n?/g, `
+  if (typeof i != "string") return t;
+  const s = i.replace(/^﻿/, "").replace(/\r\n?/g, `
 `).split(/\n\n+/);
-  let r = 0;
-  for (const n of i) {
-    const a = n.split(`
+  let a = 0;
+  for (const r of s) {
+    const n = r.split(`
 `).filter((y) => y.length > 0);
-    if (a.length === 0) continue;
+    if (n.length === 0) continue;
     let o = 0;
-    if (/^WEBVTT/.test(a[0]) && r === 0 && !j.test(a[0])) {
-      if (a.length === 1) continue;
+    if (/^WEBVTT/.test(n[0]) && a === 0 && !P.test(n[0])) {
+      if (n.length === 1) continue;
       o = 1;
     }
-    if (/^(NOTE|STYLE|REGION)\b/.test(a[o])) continue;
+    if (/^(NOTE|STYLE|REGION)\b/.test(n[o])) continue;
     let d = "";
-    a[o] && !a[o].includes("-->") && (d = a[o], o += 1);
-    const l = a[o];
+    n[o] && !n[o].includes("-->") && (d = n[o], o += 1);
+    const l = n[o];
     if (!l || !l.includes("-->")) continue;
-    const h = l.indexOf("-->"), c = T(l.slice(0, h)), p = l.slice(h + 3).trim(), u = p.indexOf(" "), f = u === -1 ? p : p.slice(0, u), x = u === -1 ? "" : p.slice(u + 1), g = T(f);
-    if (Number.isNaN(c) || Number.isNaN(g)) continue;
-    const _ = a.slice(o + 1).join(`
+    const h = l.indexOf("-->"), p = L(l.slice(0, h)), c = l.slice(h + 3).trim(), u = c.indexOf(" "), f = u === -1 ? c : c.slice(0, u), x = u === -1 ? "" : c.slice(u + 1), g = L(f);
+    if (Number.isNaN(p) || Number.isNaN(g)) continue;
+    const m = n.slice(o + 1).join(`
 `);
     t.push({
-      index: r++,
+      index: a++,
       id: d,
-      start: c,
+      start: p,
       end: g,
-      settings: z(x),
-      payload: _
+      settings: W(x),
+      payload: m
     });
   }
   return t;
 }
-const P = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
-function V(s) {
-  return String(s).replace(/[&<>"']/g, (t) => P[t]);
+const D = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+function V(i) {
+  return String(i).replace(/[&<>"']/g, (t) => D[t]);
 }
-function w(s) {
-  let t = V(s);
-  return t = t.replace(/`([^`]+)`/g, "<code>$1</code>"), t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>"), t = t.replace(new RegExp("(?<!\\*)\\*([^*\\n]+)\\*(?!\\*)", "g"), "<em>$1</em>"), t = t.replace(/~~([^~]+)~~/g, "<del>$1</del>"), t = t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (e, i, r) => `<a href="${/^\s*(javascript|data|vbscript):/i.test(r) ? "#" : r}">${i}</a>`), t = t.replace(/\n/g, "<br>"), t;
+function w(i) {
+  let t = V(i);
+  return t = t.replace(/`([^`]+)`/g, "<code>$1</code>"), t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>"), t = t.replace(new RegExp("(?<!\\*)\\*([^*\\n]+)\\*(?!\\*)", "g"), "<em>$1</em>"), t = t.replace(/~~([^~]+)~~/g, "<del>$1</del>"), t = t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (e, s, a) => `<a href="${/^\s*(javascript|data|vbscript):/i.test(a) ? "#" : a}">${s}</a>`), t = t.replace(/\n/g, "<br>"), t;
 }
-function q(s) {
-  return /^#{1,6}\s/.test(s) || /^\s*[-*+]\s+/.test(s) || /^\s*\d+\.\s+/.test(s) || /^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(s.trim());
+function q(i) {
+  return /^#{1,6}\s/.test(i) || /^\s*[-*+]\s+/.test(i) || /^\s*\d+\.\s+/.test(i) || /^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(i.trim());
 }
-function L(s) {
-  const e = String(s).replace(/\r\n?/g, `
+function B(i) {
+  const e = String(i).replace(/\r\n?/g, `
 `).split(`
 `);
   if (e.length === 1 && !q(e[0])) return w(e[0]);
-  const i = [];
-  let r = [], n = null;
-  const a = () => {
-    r.length && i.push(`<p>${w(r.join(`
-`))}</p>`), r = [];
+  const s = [];
+  let a = [], r = null;
+  const n = () => {
+    a.length && s.push(`<p>${w(a.join(`
+`))}</p>`), a = [];
   }, o = () => {
-    if (n) {
-      const d = n.items.map((l) => `<li>${w(l)}</li>`).join("");
-      i.push(`<${n.tag}>${d}</${n.tag}>`);
+    if (r) {
+      const d = r.items.map((l) => `<li>${w(l)}</li>`).join("");
+      s.push(`<${r.tag}>${d}</${r.tag}>`);
     }
-    n = null;
+    r = null;
   };
   for (const d of e) {
     if (/^\s*$/.test(d)) {
-      a(), o();
+      n(), o();
       continue;
     }
     const l = /^(#{1,6})\s+(.*)$/.exec(d);
     if (l) {
-      a(), o(), i.push(`<h${l[1].length}>${w(l[2])}</h${l[1].length}>`);
+      n(), o(), s.push(`<h${l[1].length}>${w(l[2])}</h${l[1].length}>`);
       continue;
     }
     if (/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(d)) {
-      a(), o(), i.push("<hr>");
+      n(), o(), s.push("<hr>");
       continue;
     }
     const h = /^\s*[-*+]\s+(.*)$/.exec(d);
     if (h) {
-      a(), (!n || n.tag !== "ul") && (o(), n = { tag: "ul", items: [] }), n.items.push(h[1]);
+      n(), (!r || r.tag !== "ul") && (o(), r = { tag: "ul", items: [] }), r.items.push(h[1]);
       continue;
     }
-    const c = /^\s*\d+\.\s+(.*)$/.exec(d);
-    if (c) {
-      a(), (!n || n.tag !== "ol") && (o(), n = { tag: "ol", items: [] }), n.items.push(c[1]);
+    const p = /^\s*\d+\.\s+(.*)$/.exec(d);
+    if (p) {
+      n(), (!r || r.tag !== "ol") && (o(), r = { tag: "ol", items: [] }), r.items.push(p[1]);
       continue;
     }
-    o(), r.push(d);
+    o(), a.push(d);
   }
-  return a(), o(), i.join("");
+  return n(), o(), s.join("");
 }
 const U = /* @__PURE__ */ new Set([
   "center",
@@ -119,21 +119,21 @@ const U = /* @__PURE__ */ new Set([
   "bottom-left",
   "bottom-right"
 ]);
-function A(s) {
-  return typeof s == "number" ? s : typeof s == "string" ? parseFloat(s.replace("%", "")) : NaN;
+function T(i) {
+  return typeof i == "number" ? i : typeof i == "string" ? parseFloat(i.replace("%", "")) : NaN;
 }
-function Y(s, t) {
-  const e = s || (t === "end" ? "line-right" : t === "center" ? "center" : "line-left");
+function Y(i, t) {
+  const e = i || (t === "end" ? "line-right" : t === "center" ? "center" : "line-left");
   return e === "line-left" ? "left" : e === "line-right" ? "right" : "center";
 }
-function K(s) {
-  return s === "end" ? "bottom" : s === "center" ? "center" : "top";
+function K(i) {
+  return i === "end" ? "bottom" : i === "center" ? "center" : "top";
 }
-function J(s, t) {
-  return s === "center" && t === "center" ? "center" : s === "center" ? t : t === "center" ? s : `${t}-${s}`;
+function J(i, t) {
+  return i === "center" && t === "center" ? "center" : i === "center" ? t : t === "center" ? i : `${t}-${i}`;
 }
-function G(s) {
-  const t = (s || "").trim();
+function G(i) {
+  const t = (i || "").trim();
   if (!t.startsWith("{")) return null;
   try {
     const e = JSON.parse(t);
@@ -142,29 +142,29 @@ function G(s) {
     return null;
   }
 }
-function X(s, t = {}) {
-  const e = G(s.payload), i = s.settings || {};
-  let r, n;
-  e && typeof e.html == "string" ? (r = e.html, n = e.text || "") : e && typeof e.text == "string" ? (n = e.text, r = L(e.text)) : (n = s.payload, r = L(s.payload));
-  const [a, o] = String(i.position ?? "").split(","), [d, l] = String(i.line ?? "").split(",");
-  let h = e && e.x != null ? e.x : A(a), c = e && e.y != null ? e.y : A(d), p = e && e.w != null ? e.w : A(i.size), u = e && e.anchor, f = e && e.align || i.align || "start";
+function X(i, t = {}) {
+  const e = G(i.payload), s = i.settings || {};
+  let a, r;
+  e && typeof e.html == "string" ? (a = e.html, r = e.text || "") : e && typeof e.text == "string" ? (r = e.text, a = B(e.text)) : (r = i.payload, a = B(i.payload));
+  const [n, o] = String(s.position ?? "").split(","), [d, l] = String(s.line ?? "").split(",");
+  let h = e && e.x != null ? e.x : T(n), p = e && e.y != null ? e.y : T(d), c = e && e.w != null ? e.w : T(s.size), u = e && e.anchor, f = e && e.align || s.align || "start";
   f === "left" && (f = "start"), f === "right" && (f = "end");
-  const x = h != null && h !== "" && !(typeof h == "number" && Number.isNaN(h)), g = c != null && c !== "" && !(typeof c == "number" && Number.isNaN(c)), _ = p != null && p !== "" && !(typeof p == "number" && Number.isNaN(p));
+  const x = h != null && h !== "" && !(typeof h == "number" && Number.isNaN(h)), g = p != null && p !== "" && !(typeof p == "number" && Number.isNaN(p)), m = c != null && c !== "" && !(typeof c == "number" && Number.isNaN(c));
   if (!u || !U.has(u))
-    if (!e && (i.position != null || i.line != null)) {
-      const y = Y(o, f), C = i.line != null ? K(l) : "bottom";
-      u = J(y, C);
+    if (!e && (s.position != null || s.line != null)) {
+      const y = Y(o, f), A = s.line != null ? K(l) : "bottom";
+      u = J(y, A);
     } else
       u = "bottom";
-  return x || (h = 50), g || (c = 88), {
-    index: s.index,
-    id: s.id,
-    start: s.start,
-    end: s.end,
-    text: n,
-    html: r,
+  return x || (h = 50), g || (p = 88), {
+    index: i.index,
+    id: i.id,
+    start: i.start,
+    end: i.end,
+    text: r,
+    html: a,
     isHtml: !!(e && typeof e.html == "string"),
-    placement: { x: h, y: c, w: _ ? p : null, anchor: u, align: f },
+    placement: { x: h, y: p, w: m ? c : null, anchor: u, align: f },
     style: {
       bg: e ? e.bg : void 0,
       fg: e && e.fg,
@@ -180,41 +180,41 @@ function X(s, t = {}) {
     exit: e && e.exit || t.exit || "fade"
   };
 }
-function Q(s, t = {}) {
-  return D(s).map((e) => X(e, t));
+function Q(i, t = {}) {
+  return j(i).map((e) => X(e, t));
 }
 const b = 0.02;
-function Z(s) {
-  return s.map((t, e) => ({ index: e, time: t.start, end: t.end })).sort((t, e) => t.time - e.time);
+function Z(i) {
+  return i.map((t, e) => ({ index: e, time: t.start, end: t.end })).sort((t, e) => t.time - e.time);
 }
-function tt(s, t) {
-  for (let e = 0; e < s.length; e++)
-    if (t >= s[e].start - b && t < s[e].end - b) return e;
+function tt(i, t) {
+  for (let e = 0; e < i.length; e++)
+    if (t >= i[e].start - b && t < i[e].end - b) return e;
   return -1;
 }
-function et(s, t, e = b) {
-  let i = -1, r = 1 / 0;
-  for (let n = 0; n < s.length; n++) {
-    const a = s[n].start;
-    a > t + e && a < r && (r = a, i = n);
+function et(i, t, e = b) {
+  let s = -1, a = 1 / 0;
+  for (let r = 0; r < i.length; r++) {
+    const n = i[r].start;
+    n > t + e && n < a && (a = n, s = r);
   }
-  return i;
+  return s;
 }
-function st(s, t, e = b) {
-  let i = -1, r = -1 / 0;
-  for (let n = 0; n < s.length; n++) {
-    const a = s[n].start;
-    a < t - e && a > r && (r = a, i = n);
+function it(i, t, e = b) {
+  let s = -1, a = -1 / 0;
+  for (let r = 0; r < i.length; r++) {
+    const n = i[r].start;
+    n < t - e && n > a && (a = n, s = r);
   }
-  return i;
+  return s;
 }
-function k(s, t, e = b) {
-  let i = -1, r = -1 / 0;
-  for (let n = 0; n < s.length; n++) {
-    const a = s[n].start;
-    a <= t + e && a > r && (r = a, i = n);
+function k(i, t, e = b) {
+  let s = -1, a = -1 / 0;
+  for (let r = 0; r < i.length; r++) {
+    const n = i[r].start;
+    n <= t + e && n > a && (a = n, s = r);
   }
-  return i;
+  return s;
 }
 const S = {
   center: "translate(-50%, -50%)",
@@ -237,64 +237,65 @@ const S = {
   "bottom-left": "0 100%",
   "bottom-right": "100% 100%"
 };
-function N(s, t = "%") {
-  return s == null ? null : typeof s == "number" ? `${s}${t}` : String(s);
+function N(i, t = "%") {
+  return i == null ? null : typeof i == "number" ? `${i}${t}` : String(i);
 }
-function M(s) {
-  const t = typeof s == "number" ? s : parseFloat(s);
+function M(i) {
+  const t = typeof i == "number" ? i : parseFloat(i);
   return Number.isFinite(t) ? Math.max(0, Math.min(100, t)) : 50;
 }
-function it(s, t) {
-  s.style.left = N(t.x), s.style.top = N(t.y), s.style.transformOrigin = $[t.anchor] || $.bottom, s.style.transform = S[t.anchor] || S.bottom, t.w != null ? s.style.width = N(t.w) : s.style.width = "";
+function st(i, t) {
+  i.style.left = N(t.x), i.style.top = N(t.y), i.style.transformOrigin = $[t.anchor] || $.bottom, i.style.transform = S[t.anchor] || S.bottom, t.w != null ? i.style.width = N(t.w) : i.style.width = "";
 }
-function rt(s, t) {
-  if (s == null) return;
-  if (t == null || t >= 1) return s;
-  const e = Math.max(0, Math.min(1, Number(t))), i = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(s.trim());
-  if (i) {
-    let n = i[1];
-    n.length === 3 && (n = n.split("").map((l) => l + l).join(""));
-    const a = parseInt(n.slice(0, 2), 16), o = parseInt(n.slice(2, 4), 16), d = parseInt(n.slice(4, 6), 16);
-    return `rgba(${a}, ${o}, ${d}, ${e})`;
+function at(i, t) {
+  if (i == null) return;
+  if (t == null || t >= 1) return i;
+  const e = Math.max(0, Math.min(1, Number(t))), s = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(i.trim());
+  if (s) {
+    let r = s[1];
+    r.length === 3 && (r = r.split("").map((l) => l + l).join(""));
+    const n = parseInt(r.slice(0, 2), 16), o = parseInt(r.slice(2, 4), 16), d = parseInt(r.slice(4, 6), 16);
+    return `rgba(${n}, ${o}, ${d}, ${e})`;
   }
-  const r = /^rgba?\(([^)]+)\)$/i.exec(s.trim());
-  if (r) {
-    const n = r[1].split(",").map((a) => a.trim()).slice(0, 3);
-    if (n.length === 3) return `rgba(${n.join(", ")}, ${e})`;
+  const a = /^rgba?\(([^)]+)\)$/i.exec(i.trim());
+  if (a) {
+    const r = a[1].split(",").map((n) => n.trim()).slice(0, 3);
+    if (r.length === 3) return `rgba(${r.join(", ")}, ${e})`;
   }
-  return s;
+  return i;
 }
-function nt(s, t, e) {
+function rt(i, t, e) {
   if (!t) return;
-  t.fg && (s.style.color = t.fg), t.font && (s.style.font = t.font), t.padding && (s.style.padding = t.padding), t.radius != null && (s.style.borderRadius = N(t.radius, "px")), t.border && (s.style.border = t.border), t.shadow && (s.style.boxShadow = t.shadow);
-  const i = rt(t.bg, t.opacity);
-  i && (s.style.background = i), e && (s.style.textAlign = e);
+  t.fg && (i.style.color = t.fg), t.font && (i.style.font = t.font), t.padding && (i.style.padding = t.padding), t.radius != null && (i.style.borderRadius = N(t.radius, "px")), t.border && (i.style.border = t.border), t.shadow && (i.style.boxShadow = t.shadow);
+  const s = at(t.bg, t.opacity);
+  s && (i.style.background = s), e && (i.style.textAlign = e);
 }
-function at(s, t, e) {
-  const i = s.createElement("div");
-  if (i.className = "vexy-vlip__cardnav", e.counter !== !1) {
-    const o = s.createElement("span");
-    o.className = "vexy-vlip__counter", o.textContent = `${t.index + 1}/${e.total}`, i.appendChild(o);
+function nt(i, t, e) {
+  const s = i.createElement("div");
+  if (s.className = "vexy-vlip__cardnav", e.counter !== !1) {
+    const n = i.createElement("span");
+    n.className = "vexy-vlip__counter", n.textContent = `${t.index + 1}/${e.total}`, s.appendChild(n);
   }
-  const r = s.createElement("span");
-  r.className = "vexy-vlip__navspacer", i.appendChild(r);
-  const n = s.createElement("button");
-  n.type = "button", n.className = "vexy-vlip__prev", n.textContent = e.prevLabel ?? "←", n.setAttribute("aria-label", "Previous step");
-  const a = s.createElement("button");
-  return a.type = "button", a.className = "vexy-vlip__next", a.textContent = e.nextLabel ?? "Next →", i.append(n, a), i;
+  const a = i.createElement("span");
+  if (a.className = "vexy-vlip__navspacer", s.appendChild(a), e.back) {
+    const n = i.createElement("button");
+    n.type = "button", n.className = "vexy-vlip__prev", n.textContent = e.prevLabel ?? "←", n.setAttribute("aria-label", "Previous step"), s.appendChild(n);
+  }
+  const r = i.createElement("button");
+  return r.type = "button", r.className = "vexy-vlip__next", r.textContent = e.nextLabel ?? "Next →", s.appendChild(r), s;
 }
-function ot(s, t, e = {}) {
-  const i = s.createElement("div");
-  i.className = "vexy-vlip__card", i.dataset.index = String(t.index), i.dataset.enter = t.enter || "fade", i.setAttribute("role", "note"), t.className && (i.className += " " + t.className);
-  const r = s.createElement("div");
-  r.className = "vexy-vlip__body";
-  let n = t.html;
-  if (t.isHtml && typeof e.sanitize == "function" && (n = e.sanitize(n)), r.innerHTML = n, e.close) {
-    i.classList.add("vexy-vlip__card--closable");
-    const a = s.createElement("button");
-    a.type = "button", a.className = "vexy-vlip__close", a.setAttribute("aria-label", "Close cards"), a.textContent = "✕", r.appendChild(a);
+function ot(i, t, e = {}) {
+  const s = i.createElement("div");
+  s.className = "vexy-vlip__card", s.dataset.index = String(t.index), s.dataset.enter = t.enter || "fade", s.setAttribute("role", "note"), t.className && (s.className += " " + t.className);
+  const a = i.createElement("div");
+  a.className = "vexy-vlip__body";
+  let r = t.html;
+  if (t.isHtml && typeof e.sanitize == "function" && (r = e.sanitize(r)), a.innerHTML = r, e.close) {
+    s.classList.add("vexy-vlip__card--closable");
+    const n = i.createElement("button");
+    n.type = "button", n.className = "vexy-vlip__close", n.setAttribute("aria-label", "Close cards"), n.textContent = "✕", a.appendChild(n);
   }
-  return e.nav && e.nav.enabled && r.appendChild(at(s, t, e.nav)), it(i, t.placement), nt(r, t.style, t.placement.align), i.appendChild(r), i;
+  return e.nav && e.nav.enabled && a.appendChild(nt(i, t, e.nav)), st(s, t.placement), rt(a, t.style, t.placement.align), s.appendChild(a), s;
 }
 class lt {
   /**
@@ -303,8 +304,8 @@ class lt {
    */
   constructor(t, e = {}) {
     this.layer = t, this.doc = t.ownerDocument, this.opts = e, this.fit = e.fit || { enabled: !1 }, this.cards = [], this.els = /* @__PURE__ */ new Map(), this.activeIndex = -1;
-    const i = this.doc.defaultView && this.doc.defaultView.ResizeObserver;
-    this.fit.enabled && i && (this._ro = new i(() => this.refit()), this._ro.observe(this.layer));
+    const s = this.doc.defaultView && this.doc.defaultView.ResizeObserver;
+    this.fit.enabled && s && (this._ro = new s(() => this.refit()), this._ro.observe(this.layer));
   }
   /** Replace the card model set; clears the DOM. @param {Array} cards */
   setCards(t) {
@@ -316,8 +317,8 @@ class lt {
   _ensure(t) {
     let e = this.els.get(t);
     if (!e) {
-      const i = this.opts.nav ? { ...this.opts.nav, total: this.cards.length } : void 0;
-      e = ot(this.doc, this.cards[t], { ...this.opts, nav: i }), this.els.set(t, e), this.layer.appendChild(e);
+      const s = this.opts.nav ? { ...this.opts.nav, total: this.cards.length } : void 0;
+      e = ot(this.doc, this.cards[t], { ...this.opts, nav: s }), this.els.set(t, e), this.layer.appendChild(e);
     }
     return e;
   }
@@ -333,23 +334,23 @@ class lt {
    */
   _fit(t, e) {
     if (!this.fit.enabled) return;
-    const i = this.layer.clientWidth, r = this.layer.clientHeight;
-    if (!i || !r) return;
-    const n = e.placement, a = n.anchor, o = S[a] || S.bottom, d = this.fit.margin ?? 14, l = M(n.x) / 100 * i, h = M(n.y) / 100 * r, c = a === "left" || a.endsWith("-left") ? "left" : a === "right" || a.endsWith("-right") ? "right" : "center", p = a === "top" || a.startsWith("top") ? "top" : a === "bottom" || a.startsWith("bottom") ? "bottom" : "middle", u = Math.max(
+    const s = this.layer.clientWidth, a = this.layer.clientHeight;
+    if (!s || !a) return;
+    const r = e.placement, n = r.anchor, o = S[n] || S.bottom, d = this.fit.margin ?? 14, l = M(r.x) / 100 * s, h = M(r.y) / 100 * a, p = n === "left" || n.endsWith("-left") ? "left" : n === "right" || n.endsWith("-right") ? "right" : "center", c = n === "top" || n.startsWith("top") ? "top" : n === "bottom" || n.startsWith("bottom") ? "bottom" : "middle", u = Math.max(
       80,
-      c === "left" ? i - l - d : c === "right" ? l - d : 2 * Math.min(l, i - l) - 2 * d
+      p === "left" ? s - l - d : p === "right" ? l - d : 2 * Math.min(l, s - l) - 2 * d
     ), f = Math.max(
       48,
-      p === "top" ? r - h - d : p === "bottom" ? h - d : 2 * Math.min(h, r - h) - 2 * d
+      c === "top" ? a - h - d : c === "bottom" ? h - d : 2 * Math.min(h, a - h) - 2 * d
     );
-    if (t.style.transform = o, n.w == null) {
-      const C = this.fit.maxWidthPct ? this.fit.maxWidthPct / 100 * i : u, W = Math.round(Math.min(u, C));
-      t.style.width = "max-content", t.style.maxWidth = `${W}px`;
+    if (t.style.transform = o, r.w == null) {
+      const A = this.fit.maxWidthPct ? this.fit.maxWidthPct / 100 * s : u, O = Math.round(Math.min(u, A));
+      t.style.width = "max-content", t.style.maxWidth = `${O}px`;
     }
     const x = Math.max(t.offsetWidth, t.scrollWidth), g = Math.max(t.offsetHeight, t.scrollHeight);
-    let _ = Math.min(1, u / x, f / g);
+    let m = Math.min(1, u / x, f / g);
     const y = this.fit.minScale ?? 0.4;
-    _ < y && (_ = y), t.style.transform = _ < 1 ? `${o} scale(${Math.round(_ * 1e3) / 1e3})` : o;
+    m < y && (m = y), t.style.transform = m < 1 ? `${o} scale(${Math.round(m * 1e3) / 1e3})` : o;
   }
   /** Re-fit the active card (e.g. after a container resize). */
   refit() {
@@ -370,7 +371,7 @@ class lt {
     return t && t.classList.remove("vexy-vlip__card--in"), this.activeIndex = -1, !0;
   }
 }
-const B = "vexy-vlip-styles", O = `
+const I = "vexy-vlip-styles", H = `
 .vexy-vlip {
   --vv-card-bg: #ffffff;
   --vv-card-fg: #1d2430;
@@ -387,6 +388,8 @@ const B = "vexy-vlip-styles", O = `
   --vv-next-bg: #ffffff;
   --vv-next-fg: #1d2430;
   --vv-next-border: rgba(0, 0, 0, 0.82);
+  --vv-start-bg: #1d2430;
+  --vv-start-fg: #ffffff;
   --vv-close-fg: var(--vv-card-fg);
   --vv-dot: rgba(255, 255, 255, 0.45);
   --vv-dot-active: var(--vv-accent);
@@ -538,14 +541,49 @@ const B = "vexy-vlip-styles", O = `
 .vexy-vlip[data-mode="stepped"] .vexy-vlip__card--closable .vexy-vlip__close { display: block; }
 /* Reserve top-right room so the title / first line never slides under the ×. */
 .vexy-vlip[data-mode="stepped"] .vexy-vlip__card--closable .vexy-vlip__body { padding-right: 32px; }
-/* Start CTA: a prominent button centered over the dimmed first frame (both
-   modes), styled like the Next pill but 20% larger. Shown via data-start. */
-.vexy-vlip__start {
+/* CTA: the Start (pre-play) / Replay (after end) screen, centered over the
+   dimmed frame (both modes), shown via data-cta. With a title (data-titled) the
+   button sits in a card under the title; otherwise it's a bare pill. */
+.vexy-vlip__cta {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
   display: none;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+}
+.vexy-vlip[data-cta="start"] .vexy-vlip__cta,
+.vexy-vlip[data-cta="replay"] .vexy-vlip__cta { display: flex; }
+.vexy-vlip__cta-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 80%;
+  max-height: 86%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+.vexy-vlip[data-titled="true"] .vexy-vlip__cta-panel {
+  background: var(--vv-card-bg);
+  color: var(--vv-card-fg);
+  font: var(--vv-card-font);
+  padding: 24px 28px;
+  border-radius: var(--vv-card-radius);
+  box-shadow: var(--vv-card-shadow);
+  text-align: center;
+  gap: 24px;
+}
+.vexy-vlip__cta-title {
+  font-size: 1.45em;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: break-word;
+}
+/* The CTA button. Default (Start): a prominent pill, 20% larger than Next. */
+.vexy-vlip__start {
   appearance: none;
   cursor: pointer;
   font: inherit;
@@ -557,15 +595,51 @@ const B = "vexy-vlip-styles", O = `
   border-radius: 999px;
   padding: 12px 26px;
   font-size: 1.14em;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
-  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+/* In a title card the Start button is a filled "primary" — dark ground, light
+   text — to stand out on the white card. Set --vv-start-bg / --vv-start-fg. */
+.vexy-vlip[data-titled="true"][data-cta="start"] .vexy-vlip__start {
+  background: var(--vv-start-bg);
+  color: var(--vv-start-fg);
+  border-color: var(--vv-start-bg);
+}
+/* Replay is less prominent: the same outlined pill as the in-card Next button. */
+.vexy-vlip[data-cta="replay"] .vexy-vlip__start {
+  background: var(--vv-next-bg);
+  color: var(--vv-next-fg);
+  border: 1.5px solid var(--vv-next-border);
+  padding: 10px 22px;
+  font-size: 0.95em;
 }
 .vexy-vlip__start:hover {
-  filter: brightness(0.97);
-  transform: translate(-50%, -50%) scale(1.05);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  filter: brightness(0.96);
+  transform: scale(1.04);
 }
-.vexy-vlip[data-start="true"] .vexy-vlip__start { display: block; }
+/* Small top-left title during playback / while cards rest (hidden on the CTA
+   screen, where the title lives in the card). All knobs are themeable. */
+.vexy-vlip__titlebar {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0; /* top-left in LTR, top-right in RTL */
+  margin: var(--vv-title-margin, 10px 12px);
+  max-width: 72%;
+  padding: var(--vv-title-padding, 4px 10px);
+  font-size: var(--vv-title-size, 13px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--vv-title-fg, rgba(255, 255, 255, 0.92));
+  background: var(--vv-title-bg, rgba(0, 0, 0, 0.45));
+  border-radius: var(--vv-title-radius, 7px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 1;
+}
+.vexy-vlip[data-titled="true"][data-started="true"]:not([data-cta="start"]):not([data-cta="replay"]) .vexy-vlip__titlebar { opacity: 1; }
 .vexy-vlip__card--in .vexy-vlip__body { opacity: 1; transform: translateY(0); }
 .vexy-vlip__card[data-enter="slide-up"] .vexy-vlip__body { transform: translateY(14px); }
 .vexy-vlip__card[data-enter="slide-down"] .vexy-vlip__body { transform: translateY(-14px); }
@@ -663,22 +737,29 @@ const B = "vexy-vlip-styles", O = `
 }
 @media (prefers-reduced-motion: reduce) {
   .vexy-vlip__body { transition: opacity 0.001s; transform: none !important; }
+  .vexy-vlip__start,
+  .vexy-vlip__prev,
+  .vexy-vlip__next,
+  .vexy-vlip__dot { transition: none; }
+  .vexy-vlip__start:hover,
+  .vexy-vlip__prev:hover,
+  .vexy-vlip__next:hover { transform: none; }
 }
 `;
 function dt() {
-  return `:host{display:inline-block;position:relative;max-width:100%}:host([hidden]){display:none}${O}`;
+  return `:host{display:inline-block;position:relative;max-width:100%}:host([hidden]){display:none}${H}`;
 }
-function ht(s) {
-  if (!s || s.getElementById(B)) return;
-  const t = s.createElement("style");
-  t.id = B, t.textContent = O, s.head.appendChild(t);
+function ht(i) {
+  if (!i || i.getElementById(I)) return;
+  const t = i.createElement("style");
+  t.id = I, t.textContent = H, i.head.appendChild(t);
 }
-const E = {
-  linear: (s) => s,
-  "ease-in": (s) => s * s,
-  "ease-out": (s) => 1 - (1 - s) * (1 - s),
-  "ease-in-out": (s) => s * s * (3 - 2 * s)
-}, I = {
+const C = {
+  linear: (i) => i,
+  "ease-in": (i) => i * i,
+  "ease-out": (i) => 1 - (1 - i) * (1 - i),
+  "ease-in-out": (i) => i * i * (3 - 2 * i)
+}, E = {
   src: "",
   track: "",
   vtt: "",
@@ -697,7 +778,9 @@ const E = {
   overlay: !0,
   // stepped mode: dim the video behind a resting card
   nav: !0,
-  // stepped mode: in-card Back / Next
+  // stepped mode: in-card Next (and Back when `back` is on)
+  back: !1,
+  // show the in-card ← Back button (hidden by default)
   counter: !1,
   // show the "n/total" step counter in the card nav
   dots: !0,
@@ -708,6 +791,12 @@ const E = {
   prevLabel: "←",
   startLabel: "Start →",
   // centered CTA shown over the dimmed first frame
+  replayLabel: "Replay ↻",
+  // CTA shown over the dimmed first frame after the video ends
+  title: "",
+  // optional video title (shown in the CTA card + a small top-left bar)
+  titleBar: !0,
+  // when a title is set, show the small top-left title during playback
   // Auto-fit: grow cards to fit their text, then scale the whole card down if it
   // still overflows the space the anchor leaves toward the edges.
   autoFit: !0,
@@ -727,12 +816,22 @@ const E = {
   // --vv-next-fg
   nextBorder: "",
   // --vv-next-border
+  startBg: "",
+  // --vv-start-bg (prominent Start button in the title card)
+  startFg: "",
+  // --vv-start-fg
   font: "",
   // --vv-card-font
   dim: "",
   // --vv-overlay-bg; a 0..1 number is read as black at that opacity
+  titleColor: "",
+  // --vv-title-fg (top-left title)
+  titleBg: "",
+  // --vv-title-bg
+  titleSize: "",
+  // --vv-title-size
   injectStyles: !0
-}, m = {
+}, _ = {
   play: "▶",
   pause: "❚❚",
   prev: "⏮",
@@ -749,7 +848,7 @@ class F {
   constructor(t, e = {}) {
     if (!t || !t.ownerDocument)
       throw new TypeError("VexyVlip: a target element is required");
-    this.opts = { ...I, ...e }, this.doc = t.ownerDocument, this.cards = [], this.stops = [], this._destroyed = !1, this._ready = !1, this._started = !1, this._target = null, this._pendingSeg = -1, this._stepIndex = -1, this._playingToEnd = !1, this._ease = null, this._looping = !1, this._frame = null, this._mode = this.opts.mode === "stepped" ? "stepped" : "continuous", this._ac = new AbortController(), this._buildDom(t), this.opts.injectStyles && !this._inShadow && ht(this.doc), this._wireEvents(), this._loadMedia();
+    this.opts = { ...E, ...e }, this.doc = t.ownerDocument, this.cards = [], this.stops = [], this._destroyed = !1, this._ready = !1, this._started = !1, this._target = null, this._pendingSeg = -1, this._stepIndex = -1, this._playingToEnd = !1, this._ease = null, this._looping = !1, this._frame = null, this._mode = this.opts.mode === "stepped" ? "stepped" : "continuous", this._ac = new AbortController(), this._buildDom(t), this.opts.injectStyles && !this._inShadow && ht(this.doc), this._wireEvents(), this._loadMedia();
   }
   // ---- DOM ---------------------------------------------------------------
   _buildDom(t) {
@@ -761,13 +860,14 @@ class F {
     } else
       this.root = t, this.video = e.createElement("video"), this.root.appendChild(this.video);
     this._inShadow = this.root.getRootNode() instanceof ShadowRoot, this.root.classList.add("vexy-vlip"), this.root.dataset.mode = this._mode, this.root.tabIndex = this.root.tabIndex >= 0 ? this.root.tabIndex : 0, this._applyTheme();
-    const i = this.video;
-    i.classList.add("vexy-vlip__video"), i.playsInline = !0, i.preload = "metadata", this.opts.src && (i.src = this.opts.src), this.opts.poster && (i.poster = this.opts.poster), i.loop = !!this.opts.loop && this._mode !== "stepped", i.muted = !!this.opts.muted, i.controls = !1, this.tap = e.createElement("button"), this.tap.className = "vexy-vlip__tap", this.tap.type = "button", this.tap.setAttribute("aria-label", "Advance to the next step"), this.root.appendChild(this.tap), this.opts.overlay && (this.overlay = e.createElement("div"), this.overlay.className = "vexy-vlip__overlay", this.overlay.setAttribute("aria-hidden", "true"), this.root.appendChild(this.overlay)), this.root.dataset.overlay = "false", this.cardsLayer = e.createElement("div"), this.cardsLayer.className = "vexy-vlip__cards", this.cardsLayer.setAttribute("aria-live", "polite"), this.root.appendChild(this.cardsLayer), this.layer = new lt(this.cardsLayer, {
-      sanitize: this.opts.sanitize ? ct : void 0,
+    const s = this.video;
+    s.classList.add("vexy-vlip__video"), s.playsInline = !0, s.preload = "metadata", this.opts.src && (s.src = this.opts.src), this.opts.poster && (s.poster = this.opts.poster), s.loop = !!this.opts.loop && this._mode !== "stepped", s.muted = !!this.opts.muted, s.controls = !1, this.tap = e.createElement("button"), this.tap.className = "vexy-vlip__tap", this.tap.type = "button", this.tap.setAttribute("aria-label", "Advance to the next step"), this.root.appendChild(this.tap), this.opts.overlay && (this.overlay = e.createElement("div"), this.overlay.className = "vexy-vlip__overlay", this.overlay.setAttribute("aria-hidden", "true"), this.root.appendChild(this.overlay)), this.root.dataset.overlay = "false", this.cardsLayer = e.createElement("div"), this.cardsLayer.className = "vexy-vlip__cards", this.cardsLayer.setAttribute("aria-live", "polite"), this.root.appendChild(this.cardsLayer), this.layer = new lt(this.cardsLayer, {
+      sanitize: this.opts.sanitize ? pt : void 0,
       close: !!this.opts.closable,
       nav: {
         enabled: !!this.opts.nav,
         counter: this.opts.counter !== !1,
+        back: !!this.opts.back,
         nextLabel: this.opts.nextLabel,
         prevLabel: this.opts.prevLabel
       },
@@ -776,60 +876,66 @@ class F {
         minScale: Number(this.opts.minScale) || 0.4,
         maxWidthPct: Number(this.opts.maxWidth) || 72
       }
-    }), this.opts.controls && this._buildControls(), this.startBtn = e.createElement("button"), this.startBtn.className = "vexy-vlip__start", this.startBtn.type = "button", this.startBtn.textContent = this.opts.startLabel ?? I.startLabel, this.root.appendChild(this.startBtn), this.root.dataset.start = "false";
+    }), this.opts.controls && this._buildControls(), this.root.dataset.titled = this.opts.title ? "true" : "false", this.cta = e.createElement("div"), this.cta.className = "vexy-vlip__cta";
+    const a = e.createElement("div");
+    if (a.className = "vexy-vlip__cta-panel", this.opts.title) {
+      const r = e.createElement("div");
+      r.className = "vexy-vlip__cta-title", r.textContent = this.opts.title, r.setAttribute("role", "heading"), r.setAttribute("aria-level", "2"), a.appendChild(r);
+    }
+    this.startBtn = e.createElement("button"), this.startBtn.className = "vexy-vlip__start", this.startBtn.type = "button", this.startBtn.textContent = this.opts.startLabel ?? E.startLabel, a.appendChild(this.startBtn), this.cta.appendChild(a), this.root.appendChild(this.cta), this.root.dataset.cta = "", this.root.dataset.started = "false", this.opts.title && this.opts.titleBar && (this.titleBar = e.createElement("div"), this.titleBar.className = "vexy-vlip__titlebar", this.titleBar.textContent = this.opts.title, this.titleBar.setAttribute("aria-hidden", "true"), this.root.appendChild(this.titleBar));
   }
   /** Write any provided theme options onto the root as CSS custom properties. */
   _applyTheme() {
-    const t = (i, r) => {
-      r != null && r !== "" && this.root.style.setProperty(i, String(r));
+    const t = (s, a) => {
+      a != null && a !== "" && this.root.style.setProperty(s, String(a));
     };
-    t("--vv-card-bg", this.opts.cardBg), t("--vv-card-bg-stepped", this.opts.cardBg), t("--vv-card-fg", this.opts.cardFg), t("--vv-next-bg", this.opts.nextBg), t("--vv-next-fg", this.opts.nextFg), t("--vv-next-border", this.opts.nextBorder), t("--vv-card-font", this.opts.font), this.opts.maxWidth && t("--vv-card-max-width", `${Number(this.opts.maxWidth)}%`);
+    t("--vv-card-bg", this.opts.cardBg), t("--vv-card-bg-stepped", this.opts.cardBg), t("--vv-card-fg", this.opts.cardFg), t("--vv-next-bg", this.opts.nextBg), t("--vv-next-fg", this.opts.nextFg), t("--vv-next-border", this.opts.nextBorder), t("--vv-start-bg", this.opts.startBg), t("--vv-start-fg", this.opts.startFg), t("--vv-card-font", this.opts.font), t("--vv-title-fg", this.opts.titleColor), t("--vv-title-bg", this.opts.titleBg), t("--vv-title-size", this.opts.titleSize), this.opts.maxWidth && t("--vv-card-max-width", `${Number(this.opts.maxWidth)}%`);
     const e = this.opts.dim;
     if (e != null && e !== "") {
-      const i = Number(e);
-      t("--vv-overlay-bg", Number.isFinite(i) && i >= 0 && i <= 1 ? `rgba(0, 0, 0, ${i})` : e);
+      const s = Number(e);
+      t("--vv-overlay-bg", Number.isFinite(s) && s >= 0 && s <= 1 ? `rgba(0, 0, 0, ${s})` : e);
     }
   }
   _buildControls() {
     const t = this.doc, e = t.createElement("div");
     e.className = "vexy-vlip__controls";
-    const i = (n, a) => {
+    const s = (r, n) => {
       const o = t.createElement("button");
-      return o.className = "vexy-vlip__btn", o.type = "button", o.textContent = n, o.setAttribute("aria-label", a), o;
+      return o.className = "vexy-vlip__btn", o.type = "button", o.textContent = r, o.setAttribute("aria-label", n), o;
     };
-    this._playBtn = i(m.play, "Play"), this._prevBtn = i(m.prev, "Previous step"), this._nextBtn = i(m.next, "Next step"), this._dots = t.createElement("div"), this._dots.className = "vexy-vlip__dots", this._time = t.createElement("span"), this._time.className = "vexy-vlip__time", this._muteBtn = i(this.opts.muted ? m.muted : m.mute, "Mute"), this._fsBtn = i(m.fs, "Fullscreen"), e.append(this._prevBtn, this._playBtn, this._nextBtn, this._dots, this._time, this._muteBtn, this._fsBtn), this._controlsBar = e, this.root.appendChild(e);
-    const r = { signal: this._ac.signal };
-    this._playBtn.addEventListener("click", () => this.toggle(), r), this._prevBtn.addEventListener("click", () => this.prev(), r), this._nextBtn.addEventListener("click", () => this.next(), r), this._muteBtn.addEventListener("click", () => this._toggleMute(), r), this._fsBtn.addEventListener("click", () => this._toggleFullscreen(), r);
+    this._playBtn = s(_.play, "Play"), this._prevBtn = s(_.prev, "Previous step"), this._nextBtn = s(_.next, "Next step"), this._dots = t.createElement("div"), this._dots.className = "vexy-vlip__dots", this._time = t.createElement("span"), this._time.className = "vexy-vlip__time", this._muteBtn = s(this.opts.muted ? _.muted : _.mute, "Mute"), this._fsBtn = s(_.fs, "Fullscreen"), e.append(this._prevBtn, this._playBtn, this._nextBtn, this._dots, this._time, this._muteBtn, this._fsBtn), this._controlsBar = e, this.root.appendChild(e);
+    const a = { signal: this._ac.signal };
+    this._playBtn.addEventListener("click", () => this.toggle(), a), this._prevBtn.addEventListener("click", () => this.prev(), a), this._nextBtn.addEventListener("click", () => this.next(), a), this._muteBtn.addEventListener("click", () => this._toggleMute(), a), this._fsBtn.addEventListener("click", () => this._toggleFullscreen(), a);
   }
   _buildDots() {
     !this._dots || !this.opts.dots || (this._dots.replaceChildren(), this.cards.forEach((t, e) => {
-      const i = this.doc.createElement("button");
-      i.className = "vexy-vlip__dot", i.type = "button", i.setAttribute("aria-label", `Step ${e + 1}`), i.addEventListener("click", () => this.goToSegment(e), { signal: this._ac.signal }), this._dots.appendChild(i);
+      const s = this.doc.createElement("button");
+      s.className = "vexy-vlip__dot", s.type = "button", s.setAttribute("aria-label", `Step ${e + 1}`), s.addEventListener("click", () => this.goToSegment(e), { signal: this._ac.signal }), this._dots.appendChild(s);
     }));
   }
   // ---- events ------------------------------------------------------------
   _wireEvents() {
     const t = this.video, e = { signal: this._ac.signal };
-    t.addEventListener("loadedmetadata", () => this._onMeta(), e), t.addEventListener("ended", () => this._handleEnded(), e), t.addEventListener("play", () => this._reflect(), e), t.addEventListener("pause", () => this._reflect(), e), t.addEventListener("seeked", () => this._updateUi(), e), this.startBtn.addEventListener("click", (i) => {
-      i.preventDefault(), this._begin();
-    }, e), this.tap.addEventListener("click", (i) => {
-      this.toggle(), i.preventDefault();
-    }, e), this.cardsLayer.addEventListener("click", (i) => {
-      const r = i.target;
-      if (r && r.closest(".vexy-vlip__close")) {
-        i.preventDefault(), this.close();
+    t.addEventListener("loadedmetadata", () => this._onMeta(), e), t.addEventListener("ended", () => this._handleEnded(), e), t.addEventListener("play", () => this._reflect(), e), t.addEventListener("pause", () => this._reflect(), e), t.addEventListener("seeked", () => this._updateUi(), e), this.startBtn.addEventListener("click", (s) => {
+      s.preventDefault(), this._onCta();
+    }, e), this.tap.addEventListener("click", (s) => {
+      this.toggle(), s.preventDefault();
+    }, e), this.cardsLayer.addEventListener("click", (s) => {
+      const a = s.target;
+      if (a && a.closest(".vexy-vlip__close")) {
+        s.preventDefault(), this.close();
         return;
       }
-      if (r && r.closest(".vexy-vlip__next")) {
-        i.preventDefault(), this.next();
+      if (a && a.closest(".vexy-vlip__next")) {
+        s.preventDefault(), this.next();
         return;
       }
-      if (r && r.closest(".vexy-vlip__prev")) {
-        i.preventDefault(), this.prev();
+      if (a && a.closest(".vexy-vlip__prev")) {
+        s.preventDefault(), this.prev();
         return;
       }
-      r && (r.closest("a") || r.closest("button:not(.vexy-vlip__tap)")) || this._mode === "stepped" && this.toggle();
-    }, e), this.opts.keyboard && this.root.addEventListener("keydown", (i) => this._handleKey(i), e);
+      a && (a.closest("a") || a.closest("button:not(.vexy-vlip__tap)")) || this._mode === "stepped" && this.toggle();
+    }, e), this.opts.keyboard && this.root.addEventListener("keydown", (s) => this._handleKey(s), e);
   }
   _handleKey(t) {
     switch (t.key) {
@@ -872,7 +978,7 @@ class F {
     if (this._ready || this._destroyed || !this._metaReady || !this._cardsReady) return;
     this._ready = !0;
     const t = this.opts.startSegment;
-    t != null && this.cards[t] ? (this._stepIndex = t, this.video.currentTime = this.cards[t].start, this._mode === "stepped" && this.layer.show(t)) : this.opts.startAt && (this.video.currentTime = this.opts.startAt, this._stepIndex = k(this.cards, this.opts.startAt)), this._updateUi(), this._emit("ready", { segments: this.cards.length }), this._mode === "continuous" && this.opts.autoplay ? (this._started = !0, this.play()) : t != null && this.cards[t] ? (this._started = !0, this._showHint(this._mode === "stepped")) : (this._primeFirstFrame(), this._showStart(!0));
+    t != null && this.cards[t] ? (this._stepIndex = t, this.video.currentTime = this.cards[t].start, this._mode === "stepped" && this.layer.show(t)) : this.opts.startAt && (this.video.currentTime = this.opts.startAt, this._stepIndex = k(this.cards, this.opts.startAt)), this._updateUi(), this._emit("ready", { segments: this.cards.length }), this._mode === "continuous" && this.opts.autoplay ? (this._started = !0, this.root.dataset.started = "true", this.play()) : t != null && this.cards[t] ? (this._started = !0, this.root.dataset.started = "true", this._showHint(this._mode === "stepped")) : (this._primeFirstFrame(), this._showCta("start"));
   }
   /**
    * Force the first video frame to paint under the Start overlay. A `<video>`
@@ -885,17 +991,26 @@ class F {
    */
   _primeFirstFrame() {
     const t = this.video;
-    if (this._started || this.opts.autoplay || this.opts.startAt || this.opts.startSegment != null || t.currentTime > 0.01) return;
-    const e = Number.isFinite(t.duration) ? t.duration : 0, i = e > 0 ? Math.min(0.042, Math.max(0, e - 0.01)) : 0.042, r = () => {
-      if (!this._destroyed)
-        try {
-          t.currentTime = i;
-        } catch {
-        }
-    };
-    if (r(), t.addEventListener("loadeddata", r, { once: !0, signal: this._ac.signal }), typeof t.requestVideoFrameCallback == "function")
+    this._started || this.opts.autoplay || this.opts.startAt || this.opts.startSegment != null || t.currentTime > 0.01 || (this._seekToPaint(0.042), t.addEventListener("loadeddata", () => {
+      !this._started && t.currentTime < 0.05 && this._seekToPaint(0.042);
+    }, { once: !0, signal: this._ac.signal }));
+  }
+  /**
+   * Seek to a tiny offset to force the browser to decode + present that frame
+   * (Safari paints nothing at a freshly-loaded `currentTime`). Shared by the
+   * Start screen (first frame) and Replay (back to the first frame after end).
+   */
+  _seekToPaint(t) {
+    const e = this.video;
+    if (this._destroyed) return;
+    const s = Number.isFinite(e.duration) ? e.duration : 0, a = s > 0 ? Math.min(t, Math.max(0, s - 0.01)) : t;
+    try {
+      e.currentTime = a;
+    } catch {
+    }
+    if (typeof e.requestVideoFrameCallback == "function")
       try {
-        t.requestVideoFrameCallback(() => {
+        e.requestVideoFrameCallback(() => {
         });
       } catch {
       }
@@ -920,8 +1035,8 @@ class F {
     if (this._mode === "stepped" && this._target != null)
       e + b >= this._target && this._reachStop(this._pendingSeg);
     else if (this._mode === "continuous") {
-      const i = tt(this.cards, e);
-      i !== this.layer.activeIndex && (i === -1 ? (this.layer.hide(), this._emit("cardhide", {})) : (this.layer.show(i), this._emit("segmententer", { index: i, segment: this.cards[i] }), this._emit("cardshow", { index: i, segment: this.cards[i] })));
+      const s = tt(this.cards, e);
+      s !== this.layer.activeIndex && (s === -1 ? (this.layer.hide(), this._emit("cardhide", {})) : (this.layer.show(s), this._emit("segmententer", { index: s, segment: this.cards[s] }), this._emit("cardshow", { index: s, segment: this.cards[s] })));
     }
     this._updateUi(), !t.paused && !this._destroyed ? this._scheduleTick() : this._looping = !1;
   }
@@ -930,16 +1045,16 @@ class F {
     if (!this._ready) return;
     const t = this.video.currentTime;
     if (this.layer.activeIndex >= 0) {
-      const i = this.layer.activeIndex;
-      this.layer.hide(), this._emit("segmentexit", { index: i }), this._emit("cardhide", { index: i });
+      const s = this.layer.activeIndex;
+      this.layer.hide(), this._emit("segmentexit", { index: s }), this._emit("cardhide", { index: s });
     }
     this._showHint(!1);
     const e = this._stepIndex + 1 < this.cards.length ? this._stepIndex + 1 : -1;
     if (e === -1)
       this._target = null, this._pendingSeg = -1, this._playingToEnd = !0, this._playNative();
     else {
-      const i = this.cards[e].start;
-      this._playingToEnd = !1, this.opts.easing !== "linear" && E[this.opts.easing] ? this._travelEased(t, i, e) : (this._target = i, this._pendingSeg = e, this._playNative());
+      const s = this.cards[e].start;
+      this._playingToEnd = !1, this.opts.easing !== "linear" && C[this.opts.easing] ? this._travelEased(t, s, e) : (this._target = s, this._pendingSeg = e, this._playNative());
     }
     this._emit("play", {});
   }
@@ -948,16 +1063,16 @@ class F {
     const t = this.video.play();
     this._startLoop(), t && typeof t.catch == "function" && t.catch((e) => this._emit("error", { error: e, phase: "play" }));
   }
-  _travelEased(t, e, i) {
+  _travelEased(t, e, s) {
     this._cancelEase(), this.video.pause();
-    const r = E[this.opts.easing] || E.linear, n = this.video.playbackRate || 1, a = Math.max(0, e - t) / n * 1e3, o = this.video.muted;
+    const a = C[this.opts.easing] || C.linear, r = this.video.playbackRate || 1, n = Math.max(0, e - t) / r * 1e3, o = this.video.muted;
     this.video.muted = !0;
-    const d = typeof performance < "u" ? performance.now() : Date.now(), l = { segIndex: i, wasMuted: o, raf: 0 };
+    const d = typeof performance < "u" ? performance.now() : Date.now(), l = { segIndex: s, wasMuted: o, raf: 0 };
     this._ease = l;
     const h = () => {
       if (this._destroyed || this._ease !== l) return;
-      const c = typeof performance < "u" ? performance.now() : Date.now(), p = a <= 0 ? 1 : Math.min(1, (c - d) / a);
-      this.video.currentTime = t + (e - t) * r(p), this._updateUi(), p >= 1 ? (this.video.muted = o, this._ease = null, this._reachStop(i)) : l.raf = requestAnimationFrame(h);
+      const p = typeof performance < "u" ? performance.now() : Date.now(), c = n <= 0 ? 1 : Math.min(1, (p - d) / n);
+      this.video.currentTime = t + (e - t) * a(c), this._updateUi(), c >= 1 ? (this.video.muted = o, this._ease = null, this._reachStop(s)) : l.raf = requestAnimationFrame(h);
     };
     l.raf = requestAnimationFrame(h);
   }
@@ -969,8 +1084,8 @@ class F {
   }
   // ---- public API --------------------------------------------------------
   play() {
-    if (!this._started && this._ready) {
-      this._begin();
+    if (this.root.dataset.cta && this._ready) {
+      this._onCta();
       return;
     }
     this._mode === "stepped" ? this._advance() : this._playNative();
@@ -979,15 +1094,15 @@ class F {
     this._cancelEase(), this._target = null, this._pendingSeg = -1, this.video.pause(), this._emit("pause", {});
   }
   toggle() {
-    if (!this._started && this._ready) {
-      this._begin();
+    if (this.root.dataset.cta && this._ready) {
+      this._onCta();
       return;
     }
     this._mode === "stepped" ? !this.video.paused || this._ease ? this.pause() : this._advance() : this.video.paused ? this._playNative() : this.pause();
   }
   next() {
-    if (!this._started && this._ready) {
-      this._begin();
+    if (this.root.dataset.cta && this._ready) {
+      this._onCta();
       return;
     }
     if (this._mode === "stepped")
@@ -1003,14 +1118,14 @@ class F {
       this.goToSegment(Math.max(0, e));
       return;
     }
-    const t = st(this.cards, this.video.currentTime);
+    const t = it(this.cards, this.video.currentTime);
     this.goToSegment(t >= 0 ? t : 0);
   }
   seekTo(t) {
     this._cancelEase(), this._target = null, this.video.currentTime = Math.max(0, t), this._updateUi();
   }
   goToSegment(t) {
-    this.cards[t] && (this._started = !0, this.root.dataset.start = "false", this._cancelEase(), this._target = null, this._pendingSeg = -1, this._stepIndex = t, this.video.pause(), this.video.currentTime = this.cards[t].start, this.layer.show(t), this._showHint(this._mode === "stepped"), this._emit("segmententer", { index: t, segment: this.cards[t] }), this._emit("cardshow", { index: t, segment: this.cards[t] }), this._updateUi());
+    this.cards[t] && (this._started = !0, this.root.dataset.started = "true", this.root.dataset.cta = "", this._cancelEase(), this._target = null, this._pendingSeg = -1, this._stepIndex = t, this.video.pause(), this.video.currentTime = this.cards[t].start, this.layer.show(t), this._showHint(this._mode === "stepped"), this._emit("segmententer", { index: t, segment: this.cards[t] }), this._emit("cardshow", { index: t, segment: this.cards[t] }), this._updateUi());
   }
   showCard(t) {
     this.cards[t] && (this.layer.show(t), this._emit("cardshow", { index: t, segment: this.cards[t] }));
@@ -1024,14 +1139,22 @@ class F {
   }
   setMode(t) {
     const e = t === "stepped" ? "stepped" : "continuous";
-    e !== this._mode && (this._mode = e, this.root.dataset.mode = e, this._cancelEase(), this._target = null, this._stepIndex = this.layer.activeIndex >= 0 ? this.layer.activeIndex : k(this.cards, this.video.currentTime), this.video.loop = !!this.opts.loop && e !== "stepped", this.video.pause(), this.layer.hide(), this._showHint(e === "stepped"), this._emit("modechange", { mode: e }));
+    e !== this._mode && (this._mode = e, this.root.dataset.mode = e, this._cancelEase(), this._target = null, this._stepIndex = this.layer.activeIndex >= 0 ? this.layer.activeIndex : k(this.cards, this.video.currentTime), this.video.loop = !!this.opts.loop && e !== "stepped", this.video.pause(), this.layer.hide(), e === "stepped" && this._started && this._stepIndex >= 0 && this.cards[this._stepIndex] && this.layer.show(this._stepIndex), this._showHint(e === "stepped"), this._emit("modechange", { mode: e }));
   }
   setEasing(t) {
-    E[t] && (this.opts.easing = t);
+    C[t] && (this.opts.easing = t);
   }
-  /** Show/hide the Start CTA over a dimmed first frame (both modes). */
-  _showStart(t) {
-    this.root.dataset.start = t ? "true" : "false", t && this._setOverlay(!0);
+  /**
+   * Show a CTA over a dimmed frame, or hide it. `kind` is "start" (pre-play) or
+   * "replay" (after the video ends); both dim the frame and, when a title is set,
+   * sit in a card under the title. Passing a falsy kind hides the CTA.
+   */
+  _showCta(t) {
+    this.root.dataset.cta = t || "", this.startBtn && (this.startBtn.textContent = t === "replay" ? this.opts.replayLabel ?? E.replayLabel : this.opts.startLabel ?? E.startLabel, this.startBtn.setAttribute("aria-label", t === "replay" ? "Replay" : "Start")), t && this._setOverlay(!0);
+  }
+  /** Dispatch a CTA click: Start → begin; Replay → restart from the top. */
+  _onCta() {
+    this.root.dataset.cta === "replay" ? this._restart() : this._begin();
   }
   /**
    * Begin playback from the Start CTA (or the first tap / key / play() call):
@@ -1039,7 +1162,11 @@ class F {
    * re-dims at rest), continuous mode clears the dim and plays through.
    */
   _begin() {
-    this._started || !this._ready || (this._started = !0, this.root.dataset.start = "false", this._mode === "stepped" ? this._advance() : (this._setOverlay(!1), this._playNative()));
+    this._started || !this._ready || (this._started = !0, this.root.dataset.started = "true", this._showCta(null), this._mode === "stepped" ? this._advance() : (this._setOverlay(!1), this._playNative()));
+  }
+  /** Replay: reset to the very beginning, then begin again (from the Replay CTA). */
+  _restart() {
+    this._ready && (this._cancelEase(), this._target = null, this._pendingSeg = -1, this._stepIndex = -1, this.layer.hide(), this.video.currentTime = 0, this._started = !1, this._begin(), this._emit("replay", {}));
   }
   /**
    * Dismiss the stepped-mode cards and drop to a plain video player: switch to
@@ -1050,6 +1177,10 @@ class F {
   close() {
     this._mode === "stepped" && (this.setMode("continuous"), this._setOverlay(!1), this._playNative(), this._emit("close", {}));
   }
+  /** Restart playback from the very beginning (same as the Replay CTA). */
+  replay() {
+    this._restart();
+  }
   destroy() {
     this._destroyed = !0, this._stopLoop(), this._cancelEase(), this._ac.abort();
     try {
@@ -1057,16 +1188,16 @@ class F {
     } catch {
     }
     this.layer.clear();
-    for (const t of [this.tap, this.overlay, this.cardsLayer, this._controlsBar, this.startBtn])
+    for (const t of [this.tap, this.overlay, this.cardsLayer, this._controlsBar, this.cta, this.titleBar])
       t?.remove();
     this._emit("destroy", {});
   }
   // ---- helpers -----------------------------------------------------------
   _handleEnded() {
-    this._playingToEnd = !1, this._stopLoop(), this.layer.hide(), this._emit("ended", {}), this._reflect();
+    this._playingToEnd = !1, this._stopLoop(), this.layer.hide(), this._emit("ended", {}), this._reflect(), this.video.loop || (this._seekToPaint(0.042), this._showCta("replay"));
   }
   _toggleMute() {
-    this.video.muted = !this.video.muted, this._muteBtn && (this._muteBtn.textContent = this.video.muted ? m.muted : m.mute);
+    this.video.muted = !this.video.muted, this._muteBtn && (this._muteBtn.textContent = this.video.muted ? _.muted : _.mute);
   }
   _toggleFullscreen() {
     const t = this.root;
@@ -1088,20 +1219,20 @@ class F {
   }
   _reflect() {
     const t = this.video.paused;
-    this.root.dataset.paused = String(t), this._playBtn && (this._playBtn.textContent = t ? m.play : m.pause), t || this._startLoop();
+    this.root.dataset.paused = String(t), this._playBtn && (this._playBtn.textContent = t ? _.play : _.pause), t || this._startLoop();
   }
   _updateUi() {
-    if (this._reflect(), this._time && (this._time.textContent = `${R(this.video.currentTime)} / ${R(this.video.duration)}`), this._dots) {
+    if (this._reflect(), this._time && (this._time.textContent = `${z(this.video.currentTime)} / ${z(this.video.duration)}`), this._dots) {
       const t = this.layer.activeIndex >= 0 ? this.layer.activeIndex : k(this.cards, this.video.currentTime), e = this._dots.children;
-      for (let i = 0; i < e.length; i++)
-        e[i].classList.toggle("vexy-vlip__dot--active", i === t);
+      for (let s = 0; s < e.length; s++)
+        e[s].classList.toggle("vexy-vlip__dot--active", s === t);
     }
   }
   _emit(t, e) {
-    const i = new CustomEvent(`vexyvlip:${t}`, { detail: e, bubbles: !0, composed: !0 });
-    this.root.dispatchEvent(i);
-    const r = this.opts[`on${t[0].toUpperCase()}${t.slice(1)}`];
-    typeof r == "function" && r(e, this);
+    const s = new CustomEvent(`vexyvlip:${t}`, { detail: e, bubbles: !0, composed: !0 });
+    this.root.dispatchEvent(s);
+    const a = this.opts[`on${t[0].toUpperCase()}${t.slice(1)}`];
+    typeof a == "function" && a(e, this);
   }
   // ---- getters -----------------------------------------------------------
   get segments() {
@@ -1128,62 +1259,72 @@ class F {
     return this._ready;
   }
 }
-function R(s) {
-  if (!Number.isFinite(s)) return "0:00";
-  const t = Math.floor(s / 60), e = Math.floor(s % 60);
+function z(i) {
+  if (!Number.isFinite(i)) return "0:00";
+  const t = Math.floor(i / 60), e = Math.floor(i % 60);
   return `${t}:${String(e).padStart(2, "0")}`;
 }
-function ct(s) {
+function pt(i) {
   const t = document.createElement("div");
-  return t.innerHTML = s, t.querySelectorAll("script, style, iframe, object, embed").forEach((e) => e.remove()), t.querySelectorAll("*").forEach((e) => {
-    [...e.attributes].forEach((i) => {
-      (/^on/i.test(i.name) || /^(href|src)$/i.test(i.name) && /^\s*javascript:/i.test(i.value)) && e.removeAttribute(i.name);
+  return t.innerHTML = i, t.querySelectorAll("script, style, iframe, object, embed").forEach((e) => e.remove()), t.querySelectorAll("*").forEach((e) => {
+    [...e.attributes].forEach((s) => {
+      (/^on/i.test(s.name) || /^(href|src)$/i.test(s.name) && /^\s*javascript:/i.test(s.value)) && e.removeAttribute(s.name);
     });
   }), t.innerHTML;
 }
-function v(s, t, e) {
-  if (!s.hasAttribute(t)) return e;
-  const i = s.getAttribute(t);
-  return i !== "false" && i !== "0";
+function v(i, t, e) {
+  if (!i.hasAttribute(t)) return e;
+  const s = i.getAttribute(t);
+  return s !== "false" && s !== "0";
 }
-function H(s) {
+function R(i) {
   return {
-    src: s.getAttribute("src") || "",
-    track: s.getAttribute("track") || "",
-    vtt: s.getAttribute("vtt") || "",
-    mode: s.getAttribute("mode") || "continuous",
-    easing: s.getAttribute("easing") || "linear",
-    poster: s.getAttribute("poster") || "",
-    startAt: s.hasAttribute("start-at") ? Number(s.getAttribute("start-at")) : 0,
-    startSegment: s.hasAttribute("start-segment") ? Number(s.getAttribute("start-segment")) : null,
-    autoplay: v(s, "autoplay", !1),
-    loop: v(s, "loop", !1),
-    muted: v(s, "muted", !1),
-    controls: v(s, "controls", !0),
-    keyboard: v(s, "keyboard", !0),
-    overlay: v(s, "overlay", !0),
-    nav: v(s, "nav", !0),
-    dots: v(s, "dots", !0),
-    counter: v(s, "counter", !1),
-    closable: v(s, "closable", !0),
-    autoFit: v(s, "auto-fit", !0),
-    minScale: s.hasAttribute("min-scale") ? Number(s.getAttribute("min-scale")) : void 0,
-    maxWidth: s.hasAttribute("max-width") ? Number(s.getAttribute("max-width")) : void 0,
-    nextLabel: s.getAttribute("next-label") ?? void 0,
-    prevLabel: s.getAttribute("prev-label") ?? void 0,
-    startLabel: s.getAttribute("start-label") ?? void 0,
-    cardBg: s.getAttribute("card-bg") || "",
-    cardFg: s.getAttribute("card-fg") || "",
-    nextBg: s.getAttribute("next-bg") || "",
-    nextFg: s.getAttribute("next-fg") || "",
-    nextBorder: s.getAttribute("next-border") || "",
-    font: s.getAttribute("font") || "",
-    dim: s.getAttribute("dim") || "",
-    sanitize: v(s, "sanitize", !1),
+    src: i.getAttribute("src") || "",
+    track: i.getAttribute("track") || "",
+    vtt: i.getAttribute("vtt") || "",
+    mode: i.getAttribute("mode") || "continuous",
+    easing: i.getAttribute("easing") || "linear",
+    poster: i.getAttribute("poster") || "",
+    startAt: i.hasAttribute("start-at") ? Number(i.getAttribute("start-at")) : 0,
+    startSegment: i.hasAttribute("start-segment") ? Number(i.getAttribute("start-segment")) : null,
+    autoplay: v(i, "autoplay", !1),
+    loop: v(i, "loop", !1),
+    muted: v(i, "muted", !1),
+    controls: v(i, "controls", !0),
+    keyboard: v(i, "keyboard", !0),
+    overlay: v(i, "overlay", !0),
+    nav: v(i, "nav", !0),
+    dots: v(i, "dots", !0),
+    back: v(i, "back", !1),
+    counter: v(i, "counter", !1),
+    closable: v(i, "closable", !0),
+    autoFit: v(i, "auto-fit", !0),
+    minScale: i.hasAttribute("min-scale") ? Number(i.getAttribute("min-scale")) : void 0,
+    maxWidth: i.hasAttribute("max-width") ? Number(i.getAttribute("max-width")) : void 0,
+    nextLabel: i.getAttribute("next-label") ?? void 0,
+    prevLabel: i.getAttribute("prev-label") ?? void 0,
+    startLabel: i.getAttribute("start-label") ?? void 0,
+    replayLabel: i.getAttribute("replay-label") ?? void 0,
+    // `video-title` is preferred; `title` also works (but sets the native tooltip).
+    title: i.getAttribute("video-title") ?? i.getAttribute("title") ?? "",
+    titleBar: v(i, "title-bar", !0),
+    cardBg: i.getAttribute("card-bg") || "",
+    cardFg: i.getAttribute("card-fg") || "",
+    nextBg: i.getAttribute("next-bg") || "",
+    nextFg: i.getAttribute("next-fg") || "",
+    nextBorder: i.getAttribute("next-border") || "",
+    startBg: i.getAttribute("start-bg") || "",
+    startFg: i.getAttribute("start-fg") || "",
+    font: i.getAttribute("font") || "",
+    dim: i.getAttribute("dim") || "",
+    titleColor: i.getAttribute("title-color") || "",
+    titleBg: i.getAttribute("title-bg") || "",
+    titleSize: i.getAttribute("title-size") || "",
+    sanitize: v(i, "sanitize", !1),
     injectStyles: !1
   };
 }
-class pt extends HTMLElement {
+class ct extends HTMLElement {
   static get observedAttributes() {
     return [
       "src",
@@ -1192,12 +1333,42 @@ class pt extends HTMLElement {
       "mode",
       "easing",
       "poster",
-      "muted",
+      "start-at",
+      "start-segment",
+      "autoplay",
       "loop",
+      "muted",
       "controls",
-      "start-label",
+      "keyboard",
+      "sanitize",
+      "overlay",
+      "nav",
+      "back",
+      "closable",
+      "counter",
+      "dots",
+      "auto-fit",
+      "min-scale",
+      "max-width",
       "next-label",
-      "prev-label"
+      "prev-label",
+      "start-label",
+      "replay-label",
+      "video-title",
+      "title",
+      "title-bar",
+      "card-bg",
+      "card-fg",
+      "next-bg",
+      "next-fg",
+      "next-border",
+      "start-bg",
+      "start-fg",
+      "title-color",
+      "title-bg",
+      "title-size",
+      "font",
+      "dim"
     ];
   }
   constructor() {
@@ -1208,19 +1379,19 @@ class pt extends HTMLElement {
   connectedCallback() {
     if (this._vlip) return;
     const t = this.querySelector("video");
-    t && this._mount.appendChild(t), this._vlip = new F(t || this._mount, H(this));
+    t && this._mount.appendChild(t), this._vlip = new F(t || this._mount, R(this));
   }
   disconnectedCallback() {
     this._vlip?.destroy(), this._vlip = null;
   }
-  attributeChangedCallback(t, e, i) {
-    if (!(!this._vlip || e === i))
+  attributeChangedCallback(t, e, s) {
+    if (!(!this._vlip || e === s))
       switch (t) {
         case "mode":
-          this._vlip.setMode(i);
+          this._vlip.setMode(s);
           break;
         case "easing":
-          this._vlip.setEasing(i);
+          this._vlip.setEasing(s);
           break;
         case "muted":
           this._vlip.video.muted = v(this, "muted", !1);
@@ -1229,21 +1400,15 @@ class pt extends HTMLElement {
           this._vlip.video.loop = v(this, "loop", !1) && this._vlip.mode !== "stepped";
           break;
         case "poster":
-          this._vlip.video.poster = i || "";
+          this._vlip.video.poster = s || "";
           break;
-        case "controls":
-        case "src":
-        case "track":
-        case "vtt":
-        case "start-label":
-        case "next-label":
-        case "prev-label":
+        default:
           this._rebuild();
           break;
       }
   }
   _rebuild() {
-    this._vlip?.destroy(), this._mount.replaceChildren(), this._vlip = new F(this._mount, H(this));
+    this._vlip?.destroy(), this._mount.replaceChildren(), this._vlip = new F(this._mount, R(this));
   }
   // ---- delegated API ----
   play() {
@@ -1263,6 +1428,9 @@ class pt extends HTMLElement {
   }
   close() {
     return this._vlip?.close();
+  }
+  replay() {
+    return this._vlip?.replay();
   }
   seekTo(t) {
     return this._vlip?.seekTo(t);
@@ -1313,10 +1481,10 @@ class pt extends HTMLElement {
     return this._vlip?.ready ?? !1;
   }
 }
-typeof customElements < "u" && !customElements.get("vexy-vlip") && customElements.define("vexy-vlip", pt);
+typeof customElements < "u" && !customElements.get("vexy-vlip") && customElements.define("vexy-vlip", ct);
 export {
   F as VexyVlip,
-  pt as VexyVlipElement,
-  pt as default
+  ct as VexyVlipElement,
+  ct as default
 };
 //# sourceMappingURL=vexy-vlip.element.js.map

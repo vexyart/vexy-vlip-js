@@ -4,6 +4,19 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+### Added
+
+- **Replay CTA** — after the video ends (and `loop` is off), a **Replay ↻** button appears over the dimmed first frame, mirroring the Start screen. Clicking it (or the frame / Space) restarts from the top. New `replayLabel` option / `replay-label` attribute, `replay()` method, and `vexyvlip:replay` event.
+- **Video title** (`title` option / `video-title` attribute — `title` also works): shown two ways — (1) on the Start/Replay screen the CTA sits in a **card** with the title above the button; (2) during playback / while cards rest, a small, themeable **top-left title bar** (`titleBar` option to toggle; `titleColor`/`titleBg`/`titleSize` or `--vv-title-*` to style).
+- **Prominent Start button in the title card** — when a title is set, **Start** is a filled "primary" (dark ground, light text) to stand out on the white card, configurable via `startBg`/`startFg` (`--vv-start-bg`/`--vv-start-fg`). **Replay** stays a low-key outlined pill (same as the in-card Next button).
+
+### Changed
+
+- **The in-card ← Back button is now hidden by default** and opt-in via the `back` option / `back` attribute (`nav` still controls the footer + Next). Programmatic `prev()` and the keyboard `←` are unaffected.
+- Start/Replay buttons no longer carry a drop shadow, and the title card has more breathing room above the button.
+
 ## [1.0.0] — 2026-06-19
 
 First stable release. A stop-motion redesign so stepped mode reads like a guided, card-based tutorial: white cards, rendered markdown, and in-card navigation over a dimmed video — plus a Start screen, auto-fitting cards, native WebVTT positioning, and a published npm package usable straight from a CDN.

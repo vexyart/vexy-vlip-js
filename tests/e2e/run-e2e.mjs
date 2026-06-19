@@ -35,18 +35,51 @@ testCase("start: dimmed first frame + centered Start CTA, both modes", async (ct
     const page = await ctx.newPage();
     await page.goto(FIXTURE + "?mode=" + mode);
     await waitReady(page);
-    assert.equal(await page.getAttribute(".vexy-vlip", "data-start"), "true", `${mode}: Start shown`);
+    assert.equal(await page.getAttribute(".vexy-vlip", "data-cta"), "start", `${mode}: Start shown`);
     assert.equal(await page.getAttribute(".vexy-vlip", "data-overlay"), "true", `${mode}: first frame dimmed`);
     assert.ok(await page.locator(".vexy-vlip__start").isVisible(), `${mode}: Start button visible`);
     assert.equal(await page.evaluate(() => window.vlip.video.paused), true, `${mode}: paused before start`);
+    // First frame is primed off zero so Safari/iOS paint it under the button.
+    assert.ok(await page.evaluate(() => window.vlip.video.currentTime > 0), `${mode}: first frame primed`);
     await page.locator(".vexy-vlip__start").click();
-    await page.waitForFunction(() => document.querySelector(".vexy-vlip").dataset.start === "false", null, { timeout: 5000 });
+    await page.waitForFunction(() => document.querySelector(".vexy-vlip").dataset.cta === "", null, { timeout: 5000 });
     if (mode === "continuous") {
       assert.equal(await page.getAttribute(".vexy-vlip", "data-overlay"), "false", "continuous: dim cleared after start");
       assert.equal(await page.evaluate(() => window.vlip.video.paused), false, "continuous: plays after start");
     }
     await page.close();
   }
+});
+
+testCase("replay: after the video ends, a Replay CTA appears over the dimmed first frame", async (ctx) => {
+  const page = await ctx.newPage();
+  await page.goto(FIXTURE + "?mode=continuous");
+  await waitReady(page);
+  await page.locator(".vexy-vlip__start").click();
+  // Jump near the end and let it finish.
+  await page.evaluate(() => { window.vlip.seekTo(window.vlip.duration - 0.3); });
+  await page.waitForFunction(() => window.__events.some((e) => e.type === "ended"), null, { timeout: 15000 });
+  await page.waitForFunction(() => document.querySelector(".vexy-vlip").dataset.cta === "replay", null, { timeout: 5000 });
+  assert.equal(await page.getAttribute(".vexy-vlip", "data-overlay"), "true", "dimmed on replay screen");
+  assert.match(await page.locator(".vexy-vlip__start").innerText(), /replay/i);
+  // Replay restarts from the top.
+  await page.locator(".vexy-vlip__start").click();
+  await page.waitForFunction(() => document.querySelector(".vexy-vlip").dataset.cta === "", null, { timeout: 5000 });
+  assert.ok(await page.evaluate(() => window.vlip.video.currentTime < 1), "replay restarted near the beginning");
+});
+
+testCase("title: shown in the CTA card on the start screen, then in the top-left bar while playing", async (ctx) => {
+  const page = await ctx.newPage();
+  await page.goto(FIXTURE + "?mode=continuous&title=My%20Demo%20Title");
+  await waitReady(page);
+  assert.equal(await page.getAttribute(".vexy-vlip", "data-titled"), "true", "titled");
+  assert.match(await page.locator(".vexy-vlip__cta-title").innerText(), /My Demo Title/);
+  // On the start screen the top-left bar is hidden (title is in the card).
+  assert.equal(await page.evaluate(() => +getComputedStyle(document.querySelector(".vexy-vlip__titlebar")).opacity), 0, "titlebar hidden on CTA");
+  await page.locator(".vexy-vlip__start").click();
+  await page.waitForFunction(() => document.querySelector(".vexy-vlip").dataset.cta === "", null, { timeout: 5000 });
+  await page.waitForFunction(() => +getComputedStyle(document.querySelector(".vexy-vlip__titlebar")).opacity === 1, null, { timeout: 5000 });
+  assert.match(await page.locator(".vexy-vlip__titlebar").innerText(), /My Demo Title/);
 });
 
 testCase("stepped: pauses at first cue and shows card 0 on advance", async (ctx) => {
@@ -185,14 +218,60 @@ testCase("stepped: bottom bar shows only the step dots; clicking the in-card Nex
   assert.equal(await page.evaluate(() => window.vlip.currentSegment), 1, "Next click advanced to card 1");
 });
 
-testCase("stepped: the in-card Back button returns to the previous card", async (ctx) => {
+testCase("stepped: the in-card Back button is opt-in (hidden by default, shown with back)", async (ctx) => {
+  // Hidden by default.
+  const def = await ctx.newPage();
+  await def.goto(FIXTURE + "?mode=stepped");
+  await waitReady(def);
+  await def.evaluate(() => window.vlip.goToSegment(2));
+  assert.equal(await def.locator(".vexy-vlip__card--in .vexy-vlip__prev").count(), 0, "Back hidden by default");
+  await def.close();
+  // Shown + functional when back is enabled.
   const page = await ctx.newPage();
-  await page.goto(FIXTURE + "?mode=stepped");
+  await page.goto(FIXTURE + "?mode=stepped&back=true");
   await waitReady(page);
   await page.evaluate(() => window.vlip.goToSegment(2));
   assert.equal(await page.evaluate(() => window.vlip.currentSegment), 2);
   await page.locator(".vexy-vlip__card--in .vexy-vlip__prev").click();
   assert.equal(await page.evaluate(() => window.vlip.currentSegment), 1, "Back click went to card 1");
+});
+
+testCase("setMode('stepped') while live reveals the resting card (not a blank dim)", async (ctx) => {
+  const page = await ctx.newPage();
+  await page.goto(FIXTURE + "?mode=continuous");
+  await waitReady(page);
+  await page.locator(".vexy-vlip__start").click();
+  await page.evaluate(() => window.vlip.seekTo(2.2)); // inside cue 0 [2.0, 3.5)
+  await page.waitForFunction(() => window.vlip.currentSegment === 0, null, { timeout: 8000 });
+  await page.evaluate(() => window.vlip.setMode("stepped"));
+  await page.waitForFunction(() => document.querySelector(".vexy-vlip__card--in"), null, { timeout: 5000 });
+  assert.equal(await page.locator(".vexy-vlip__card--in").count(), 1, "card visible after switching to stepped");
+  assert.equal(await page.getAttribute(".vexy-vlip", "data-overlay"), "true", "dimmed behind the card");
+});
+
+testCase("web component: config attributes are reactive (back opt-in toggles live)", async (ctx) => {
+  const page = await ctx.newPage();
+  await page.goto(FIXTURE + "?mode=stepped"); // any same-origin page
+  await page.evaluate(async () => {
+    await import("/src/element.js"); // registers <vexy-vlip>
+    const el = document.createElement("vexy-vlip");
+    el.setAttribute("src", "/testdata/sample.mp4");
+    el.setAttribute("track", "/testdata/sample.vtt");
+    el.setAttribute("mode", "stepped");
+    el.setAttribute("muted", "");
+    document.body.appendChild(el);
+    window.__el = el;
+  });
+  await page.waitForFunction(() => window.__el && window.__el.ready, null, { timeout: 15000 });
+  const prevCount = () => page.evaluate(() => {
+    window.__el.goToSegment(1);
+    return window.__el.shadowRoot.querySelectorAll(".vexy-vlip__card--in .vexy-vlip__prev").length;
+  });
+  assert.equal(await prevCount(), 0, "Back hidden by default");
+  // Toggle the attribute → reactive rebuild.
+  await page.evaluate(() => window.__el.setAttribute("back", ""));
+  await page.waitForFunction(() => window.__el.ready, null, { timeout: 15000 });
+  assert.equal(await prevCount(), 1, "Back appears after enabling the attribute");
 });
 
 testCase("destroy() removes the chrome and leaves no card/control DOM", async (ctx) => {
