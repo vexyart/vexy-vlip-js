@@ -366,7 +366,45 @@ export class VexyVlip {
       this._showHint(this._mode === "stepped");
     } else {
       // The very beginning: dim the first frame and show the Start CTA (both modes).
+      this._primeFirstFrame();
       this._showStart(true);
+    }
+  }
+
+  /**
+   * Force the first video frame to paint under the Start overlay. A `<video>`
+   * parked at currentTime 0 renders nothing in Safari (and a black slate in
+   * some Chromium builds) until a frame is actually decoded — so we nudge the
+   * playhead a hair off zero, which makes the browser fetch + decode + present
+   * that frame. `requestVideoFrameCallback` (where supported) waits for the
+   * present so we don't fight an in-flight seek. Only runs while parked on the
+   * Start screen at t≈0; explicit startAt/startSegment already positioned us.
+   */
+  _primeFirstFrame() {
+    const v = this.video;
+    if (this._started || this.opts.autoplay) return;
+    if (this.opts.startAt || this.opts.startSegment != null) return;
+    if (v.currentTime > 0.01) return;
+    const dur = Number.isFinite(v.duration) ? v.duration : 0;
+    const t = dur > 0 ? Math.min(0.042, Math.max(0, dur - 0.01)) : 0.042;
+    const seek = () => {
+      if (this._destroyed) return;
+      try {
+        v.currentTime = t;
+      } catch {
+        /* not seekable yet — loadeddata will retry */
+      }
+    };
+    seek();
+    // If metadata is in but the frame pipeline isn't ready, retry once a frame
+    // (or more data) is available.
+    v.addEventListener("loadeddata", seek, { once: true, signal: this._ac.signal });
+    if (typeof v.requestVideoFrameCallback === "function") {
+      try {
+        v.requestVideoFrameCallback(() => {});
+      } catch {
+        /* ignore */
+      }
     }
   }
 

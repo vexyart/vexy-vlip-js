@@ -872,7 +872,33 @@ class F {
     if (this._ready || this._destroyed || !this._metaReady || !this._cardsReady) return;
     this._ready = !0;
     const t = this.opts.startSegment;
-    t != null && this.cards[t] ? (this._stepIndex = t, this.video.currentTime = this.cards[t].start, this._mode === "stepped" && this.layer.show(t)) : this.opts.startAt && (this.video.currentTime = this.opts.startAt, this._stepIndex = k(this.cards, this.opts.startAt)), this._updateUi(), this._emit("ready", { segments: this.cards.length }), this._mode === "continuous" && this.opts.autoplay ? (this._started = !0, this.play()) : t != null && this.cards[t] ? (this._started = !0, this._showHint(this._mode === "stepped")) : this._showStart(!0);
+    t != null && this.cards[t] ? (this._stepIndex = t, this.video.currentTime = this.cards[t].start, this._mode === "stepped" && this.layer.show(t)) : this.opts.startAt && (this.video.currentTime = this.opts.startAt, this._stepIndex = k(this.cards, this.opts.startAt)), this._updateUi(), this._emit("ready", { segments: this.cards.length }), this._mode === "continuous" && this.opts.autoplay ? (this._started = !0, this.play()) : t != null && this.cards[t] ? (this._started = !0, this._showHint(this._mode === "stepped")) : (this._primeFirstFrame(), this._showStart(!0));
+  }
+  /**
+   * Force the first video frame to paint under the Start overlay. A `<video>`
+   * parked at currentTime 0 renders nothing in Safari (and a black slate in
+   * some Chromium builds) until a frame is actually decoded — so we nudge the
+   * playhead a hair off zero, which makes the browser fetch + decode + present
+   * that frame. `requestVideoFrameCallback` (where supported) waits for the
+   * present so we don't fight an in-flight seek. Only runs while parked on the
+   * Start screen at t≈0; explicit startAt/startSegment already positioned us.
+   */
+  _primeFirstFrame() {
+    const t = this.video;
+    if (this._started || this.opts.autoplay || this.opts.startAt || this.opts.startSegment != null || t.currentTime > 0.01) return;
+    const e = Number.isFinite(t.duration) ? t.duration : 0, i = e > 0 ? Math.min(0.042, Math.max(0, e - 0.01)) : 0.042, r = () => {
+      if (!this._destroyed)
+        try {
+          t.currentTime = i;
+        } catch {
+        }
+    };
+    if (r(), t.addEventListener("loadeddata", r, { once: !0, signal: this._ac.signal }), typeof t.requestVideoFrameCallback == "function")
+      try {
+        t.requestVideoFrameCallback(() => {
+        });
+      } catch {
+      }
   }
   // ---- frame watcher -----------------------------------------------------
   _startLoop() {
@@ -1159,7 +1185,20 @@ function H(s) {
 }
 class pt extends HTMLElement {
   static get observedAttributes() {
-    return ["src", "track", "vtt", "mode", "easing", "poster", "muted", "loop", "controls"];
+    return [
+      "src",
+      "track",
+      "vtt",
+      "mode",
+      "easing",
+      "poster",
+      "muted",
+      "loop",
+      "controls",
+      "start-label",
+      "next-label",
+      "prev-label"
+    ];
   }
   constructor() {
     super(), this._shadow = this.attachShadow({ mode: "open" });
@@ -1196,6 +1235,9 @@ class pt extends HTMLElement {
         case "src":
         case "track":
         case "vtt":
+        case "start-label":
+        case "next-label":
+        case "prev-label":
           this._rebuild();
           break;
       }

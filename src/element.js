@@ -59,7 +59,10 @@ function readOptions(el) {
 
 export class VexyVlipElement extends HTMLElement {
   static get observedAttributes() {
-    return ["src", "track", "vtt", "mode", "easing", "poster", "muted", "loop", "controls"];
+    return [
+      "src", "track", "vtt", "mode", "easing", "poster", "muted", "loop", "controls",
+      "start-label", "next-label", "prev-label",
+    ];
   }
 
   constructor() {
@@ -108,7 +111,11 @@ export class VexyVlipElement extends HTMLElement {
       case "src":
       case "track":
       case "vtt":
-        // Structural change: rebuild the player.
+      case "start-label":
+      case "next-label":
+      case "prev-label":
+        // Structural change: rebuild the player (labels are baked into the
+        // Start button + each card's nav at construction).
         this._rebuild();
         break;
       default:
