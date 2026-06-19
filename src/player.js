@@ -791,11 +791,16 @@ export class VexyVlip {
     }
   }
 
-  /** Move keyboard focus to the player root (no scroll), for ←/→/Space nav. */
+  /**
+   * Move keyboard focus to the player root (for ←/→/Space) without scrolling or
+   * flashing a focus ring — this focus comes from a mouse click on the CTA, not
+   * keyboard navigation. `focusVisible:false` suppresses the ring where
+   * supported; the CSS `:focus:not(:focus-visible)` rule covers the rest.
+   */
   _focusRoot() {
     if (!this.opts.keyboard) return;
     try {
-      this.root.focus({ preventScroll: true });
+      this.root.focus({ preventScroll: true, focusVisible: false });
     } catch {
       try { this.root.focus(); } catch { /* ignore */ }
     }

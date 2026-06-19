@@ -274,6 +274,18 @@ testCase("web component: config attributes are reactive (back opt-in toggles liv
   assert.equal(await prevCount(), 1, "Back appears after enabling the attribute");
 });
 
+testCase("keyboard nav works after clicking the Start button (focus moves to the player)", async (ctx) => {
+  const page = await ctx.newPage();
+  await page.goto(FIXTURE + "?mode=stepped");
+  await waitReady(page);
+  await page.locator(".vexy-vlip__start").click(); // click the button (not the video tap)
+  await page.waitForFunction(() => window.__events.some((e) => e.type === "stop"), null, { timeout: 15000 });
+  assert.equal(await page.evaluate(() => window.vlip.currentSegment), 0, "first card after Start");
+  await page.keyboard.press("ArrowRight"); // goes to document.activeElement → must be the player
+  await page.waitForFunction(() => window.__events.filter((e) => e.type === "stop").length === 2, null, { timeout: 15000 });
+  assert.equal(await page.evaluate(() => window.vlip.currentSegment), 1, "ArrowRight advanced after a Start-button click");
+});
+
 testCase("destroy() removes the chrome and leaves no card/control DOM", async (ctx) => {
   const page = await ctx.newPage();
   await page.goto(FIXTURE);

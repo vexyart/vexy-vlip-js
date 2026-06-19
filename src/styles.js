@@ -36,6 +36,9 @@ export const CSS = `
   background: #000;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
+/* The root is focusable (it owns the keyboard handler). Don't show a ring when
+   focus arrives from a pointer (e.g. clicking Start) — only for keyboard nav. */
+.vexy-vlip:focus:not(:focus-visible) { outline: none; }
 .vexy-vlip__video {
   display: block;
   width: 100%;

@@ -400,6 +400,9 @@ const I = "vexy-vlip-styles", H = `
   background: #000;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
+/* The root is focusable (it owns the keyboard handler). Don't show a ring when
+   focus arrives from a pointer (e.g. clicking Start) — only for keyboard nav. */
+.vexy-vlip:focus:not(:focus-visible) { outline: none; }
 .vexy-vlip__video {
   display: block;
   width: 100%;
@@ -1164,11 +1167,16 @@ class F {
   _begin() {
     this._started || !this._ready || (this._started = !0, this.root.dataset.started = "true", this._showCta(null), this._focusRoot(), this._mode === "stepped" ? this._advance() : (this._setOverlay(!1), this._playNative()));
   }
-  /** Move keyboard focus to the player root (no scroll), for ←/→/Space nav. */
+  /**
+   * Move keyboard focus to the player root (for ←/→/Space) without scrolling or
+   * flashing a focus ring — this focus comes from a mouse click on the CTA, not
+   * keyboard navigation. `focusVisible:false` suppresses the ring where
+   * supported; the CSS `:focus:not(:focus-visible)` rule covers the rest.
+   */
   _focusRoot() {
     if (this.opts.keyboard)
       try {
-        this.root.focus({ preventScroll: !0 });
+        this.root.focus({ preventScroll: !0, focusVisible: !1 });
       } catch {
         try {
           this.root.focus();
@@ -1187,7 +1195,7 @@ class F {
    * mode. Wired to the in-card × button when `closable` is on.
    */
   close() {
-    this._mode === "stepped" && (this.setMode("continuous"), this._setOverlay(!1), this._playNative(), this._emit("close", {}));
+    this._mode === "stepped" && (this.setMode("continuous"), this._setOverlay(!1), this._focusRoot(), this._playNative(), this._emit("close", {}));
   }
   /** Restart playback from the very beginning (same as the Replay CTA). */
   replay() {

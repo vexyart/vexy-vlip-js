@@ -8,4 +8,4 @@ export { parseVtt, parseCards, cueToCard, parseTime, parseCueSettings, renderMar
 export { stopPoints, segmentAtTime, nextStop, prevStop, currentStop } from "./segments.js";
 export { CSS, shadowCss, injectStyles } from "./styles.js";
 
-export const version = "1.0.2"; // kept in sync with package.json by publish.sh
+export const version = "1.0.4"; // kept in sync with package.json by publish.sh
