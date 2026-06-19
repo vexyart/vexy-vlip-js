@@ -4,9 +4,13 @@
 
 All notable changes to this project are documented here.
 
-## [0.2.0] — 2026-06
+## [1.0.0] — 2026-06-19
 
-A stop-motion redesign so stepped mode reads like a guided, card-based tutorial: white cards, rendered markdown, and in-card navigation over a dimmed video.
+First stable release. A stop-motion redesign so stepped mode reads like a guided, card-based tutorial: white cards, rendered markdown, and in-card navigation over a dimmed video — plus a Start screen, auto-fitting cards, native WebVTT positioning, and a published npm package usable straight from a CDN.
+
+### Packaging
+
+- **Published to npm** as `vexy-vlip-js`, usable directly from JSDelivr / unpkg. The package ships both the ESM source (`src/`, zero-dependency, tree-shakeable) and prebuilt bundles (`dist/vexy-vlip.element.js` ESM web component, `dist/vexy-vlip.global.js` classic-script global). `unpkg`/`jsdelivr` fields point at the global build so a bare CDN URL serves the `<script>` bundle. See the README "Use from a CDN" section for versioned URLs and the JSDelivr-vs-`vexy.dev` guidance.
 
 ### Added
 

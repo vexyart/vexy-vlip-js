@@ -38,6 +38,8 @@ if [ "$DRYRUN" -eq 0 ]; then
   RELEASE_VERSION="$(git describe --tags --abbrev=0 | sed 's/^v//')"
   echo "==> Setting package.json version to ${RELEASE_VERSION}..."
   node -e "const fs=require('fs');const p=require('./package.json');p.version=process.argv[1];fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n');" "$RELEASE_VERSION"
+  echo "==> Syncing src/index.js version to ${RELEASE_VERSION}..."
+  node -e "const fs=require('fs');const f='src/index.js';fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace(/export const version = \"[^\"]*\";/, 'export const version = \"'+process.argv[1]+'\";'));" "$RELEASE_VERSION"
 fi
 
 VERSION="$(node -p "require('./package.json').version")"

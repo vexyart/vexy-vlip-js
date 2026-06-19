@@ -74,6 +74,51 @@ document.querySelector("#stage").addEventListener("vexyvlip:stop", (e) => {
 </script>
 ```
 
+## Use from a CDN (no install, no build)
+
+You can load the player straight from a `<script>`/`import` with no npm install. Two sources:
+
+### JSDelivr (recommended) — versioned & immutable, from npm
+
+Pin a version so your page never breaks when a new release ships (`@1.0.0` = exact, `@1` = latest 1.x, omit = latest):
+
+```html
+<!-- Web Component: auto-registers <vexy-vlip> -->
+<script type="module"
+  src="https://cdn.jsdelivr.net/npm/vexy-vlip-js@1/dist/vexy-vlip.element.js"></script>
+<vexy-vlip src="demo.mp4" track="demo.vtt" mode="stepped" controls></vexy-vlip>
+```
+
+```html
+<!-- Classic global: window.VexyVlip + <vexy-vlip>. The bare URL resolves to the
+     global build via the package's "jsdelivr" field. -->
+<script src="https://cdn.jsdelivr.net/npm/vexy-vlip-js@1"></script>
+<script>
+  const vlip = new VexyVlip(document.querySelector("#stage"),
+    { src: "demo.mp4", track: "demo.vtt", mode: "continuous" });
+</script>
+```
+
+```js
+// ESM API (no auto-register), straight from the CDN:
+import { VexyVlip } from "https://cdn.jsdelivr.net/npm/vexy-vlip-js@1/src/index.js";
+// or the auto-bundled form: https://cdn.jsdelivr.net/npm/vexy-vlip-js@1/+esm
+```
+
+unpkg works with the same paths (`https://unpkg.com/vexy-vlip-js@1/dist/…`).
+
+### vexy.dev — the project's own demo site
+
+The bundles that power <https://vexy.dev/vexy-vlip-js/> are served alongside it:
+
+```html
+<script type="module" src="https://vexy.dev/vexy-vlip-js/vexy-vlip.element.js"></script>
+<!-- or the global build -->
+<script src="https://vexy.dev/vexy-vlip-js/vexy-vlip.global.js"></script>
+```
+
+**Which to use?** Use **JSDelivr** for anything real — it's version-pinnable, immutable, and globally cached from the published npm release. The **vexy.dev** URLs are unversioned and always track the latest deployed site (they can change without notice), so they're best for quick demos and prototyping, not production embeds.
+
 ## Cue / card authoring
 
 The `.vtt` file is both the timing script and the layout spec for each card. Two formats:

@@ -1,16 +1,22 @@
 {
   "name": "vexy-vlip-js",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Interactive explainer video player: a single video + WebVTT becomes styled, positioned on-screen cards with continuous and click-to-advance stop-motion modes. Ships as ESM, Web Component, and a classic-script global. Zero runtime dependencies.",
   "type": "module",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "unpkg": "./dist/vexy-vlip.global.js",
+  "jsdelivr": "./dist/vexy-vlip.global.js",
   "exports": {
     ".": "./src/index.js",
     "./element": "./src/element.js",
     "./styles": "./src/styles.js",
+    "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
   "files": [
     "src",
+    "dist",
     "README.md",
     "LICENSE",
     "CHANGELOG.md",
@@ -23,7 +29,8 @@
     "test:unit": "node --test",
     "test:e2e": "node tests/e2e/run-e2e.mjs",
     "test": "npm run test:unit && npm run test:e2e",
-    "build:docs": "node scripts/build-docs.mjs"
+    "build:docs": "node scripts/build-docs.mjs",
+    "prepack": "npm run build"
   },
   "keywords": [
     "video",
