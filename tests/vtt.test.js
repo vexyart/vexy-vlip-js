@@ -101,6 +101,45 @@ test("renderMarkdown italic does not eat the preceding character", () => {
   assert.equal(renderMarkdown("**bold**"), "<strong>bold</strong>");
 });
 
+test("renderMarkdown renders headings, lists and links", () => {
+  const h = renderMarkdown("# Transform Tool\n\nUse **Transform** when needed.");
+  assert.ok(h.includes("<h1>Transform Tool</h1>"), h);
+  assert.ok(h.includes("<p>Use <strong>Transform</strong> when needed.</p>"), h);
+
+  const list = renderMarkdown("- one\n- two\n- three");
+  assert.equal(list, "<ul><li>one</li><li>two</li><li>three</li></ul>");
+
+  const ol = renderMarkdown("1. first\n2. second");
+  assert.equal(ol, "<ol><li>first</li><li>second</li></ol>");
+
+  const link = renderMarkdown("see [docs](https://example.com)");
+  assert.equal(link, 'see <a href="https://example.com">docs</a>');
+});
+
+test("renderMarkdown groups blocks line-by-line (WebVTT has no blank lines in a cue)", () => {
+  // A single cue payload: heading, paragraph, then a list — no blank lines.
+  const md = "# Transform Tool\nUse **Transform** for big changes.\n- Scale\n- Rotate";
+  const h = renderMarkdown(md);
+  assert.equal(
+    h,
+    "<h1>Transform Tool</h1>" +
+      "<p>Use <strong>Transform</strong> for big changes.</p>" +
+      "<ul><li>Scale</li><li>Rotate</li></ul>",
+    h,
+  );
+});
+
+test("renderMarkdown neutralises javascript: links and stays XSS-safe", () => {
+  const out = renderMarkdown("[x](javascript:alert(1))");
+  assert.ok(out.includes('href="#"'), out);
+  assert.ok(!/javascript:/i.test(out), out);
+});
+
+test("renderMarkdown leaves a lone plain paragraph unwrapped", () => {
+  // Back-compat: simple captions must not gain a <p> wrapper.
+  assert.equal(renderMarkdown("just a caption"), "just a caption");
+});
+
 test("tryParseJson returns null for plain text and bad JSON", () => {
   assert.equal(tryParseJson("just text"), null);
   assert.equal(tryParseJson("{ not json"), null);
@@ -141,6 +180,26 @@ x`)[0]);
   assert.equal(bare.placement.x, 50, "default centered");
   assert.equal(bare.placement.y, 88, "default near bottom");
   assert.equal(bare.placement.anchor, "bottom");
+});
+
+test("cueToCard derives the nine-point anchor from position-align × line-align", () => {
+  const anchorOf = (settings) =>
+    cueToCard(parseVtt(`WEBVTT\n\n00:00.000 --> 00:03.000 ${settings}\ntext`)[0]).placement;
+
+  const top = anchorOf("position:50%,center line:16%,start size:56%");
+  assert.equal(top.anchor, "top");
+  assert.equal(top.x, 50);
+  assert.equal(top.y, 16);
+  assert.equal(top.w, 56);
+
+  assert.equal(anchorOf("position:16%,line-left line:30%,center size:34%").anchor, "left");
+  assert.equal(anchorOf("position:70%,line-right line:24%,start size:38%").anchor, "top-right");
+  assert.equal(anchorOf("position:64%,line-right line:52%,center size:36%").anchor, "right");
+  assert.equal(anchorOf("position:88%,line-right line:86%,end size:34%").anchor, "bottom-right");
+  // d3-style upper-right: right edge, bottom edge pinned.
+  assert.equal(anchorOf("position:82%,line-right line:22%,end align:end").anchor, "bottom-right");
+  // A cue with no position/line still defaults to the bottom subtitle slot.
+  assert.equal(anchorOf("align:center").anchor, "bottom");
 });
 
 test("parseCards maps a whole document to card models in order", () => {

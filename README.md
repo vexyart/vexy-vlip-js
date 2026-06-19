@@ -83,24 +83,26 @@ The `.vtt` file is both the timing script and the layout spec for each card. Two
 ```webvtt
 WEBVTT
 
-00:02.000 --> 00:05.000 position:20% line:30% size:38% align:start
+00:02.000 --> 00:05.000 position:70%,line-right line:24%,start size:38%
 Click the **Export** button in the toolbar.
 ```
 
-Supported cue settings:
+Supported cue settings (all percentages):
 
 | Setting | Effect |
 | --- | --- |
-| `position:N%` | Horizontal anchor (% of video width) |
-| `line:N%` | Vertical anchor (% of video height) |
+| `position:N%[,line-left\|center\|line-right]` | Horizontal pin (% of width); the optional **position-align** picks the box edge/centre pinned there |
+| `line:N%[,start\|center\|end]` | Vertical pin (% of height); the optional **line-align** picks the edge (`start`=top, `end`=bottom) |
 | `size:N%` | Card width as % of video width |
-| `align:start\|center\|end` | Text alignment and anchor edge |
+| `align:start\|center\|end` | Text alignment (also the default position-align when that's omitted) |
+
+`position-align` × `line-align` resolve to the nine-point anchor — e.g. `line-right` + `end` = `bottom-right`, `center` + `start` = `top`. With no `line`, the card sits at the bottom. So everything the JSON `anchor` does is expressible in pure WebVTT (this is how `testdata/playlines.vtt` is authored — no JSON).
 
 Inline markdown subset: `**bold**`, `*italic*`, `` `code` ``, line breaks. No raw HTML (XSS-safe).
 
 ### JSON payload
 
-A cue whose trimmed payload starts with `{` is parsed as a JSON card. All fields are optional except one of `text` or `html`. If JSON parsing fails the payload is treated as plain text — no silent blank cards.
+A cue whose trimmed payload starts with `{` is parsed as a JSON card. All fields are optional except one of `text` or `html`. If JSON parsing fails the payload is treated as plain text — no silent blank cards. JSON is only needed for things plain WebVTT can't express — **per-cue styling** (`bg`, `fg`, `shadow`, …) and trusted `html` — since positioning is fully covered by the native cue settings above.
 
 ```webvtt
 00:05.000 --> 00:08.000
@@ -152,7 +154,32 @@ When `x`/`y`/`w` are absent, placement falls back to the cue's native `position`
 | `startSegment` | number | `null` | Start at a segment index |
 | `keyboard` | boolean | `true` | Space/Enter/Arrows/F/M shortcuts |
 | `sanitize` | boolean | `false` | Strip unsafe tags/attrs from `html` cards |
-| `hint` | boolean | `true` | Show "Click to continue" hint in stepped mode |
+| `overlay` | boolean | `true` | Dim the video behind a resting card in stepped mode |
+| `nav` | boolean | `true` | Show the in-card **Back / Next** buttons in stepped mode |
+| `closable` | boolean | `true` | Show the in-card **×** that dismisses the cards to plain video mode |
+| `counter` | boolean | `false` | Show the `n/total` step counter in the in-card nav |
+| `dots` | boolean | `true` | Show the step-dots bar |
+| `autoFit` | boolean | `true` | Grow cards to fit their text, then scale the whole card down if it still overflows |
+| `minScale` | number | `0.4` | Lower bound for the auto-fit scale (readability floor) |
+| `maxWidth` | number | `72` | Card grow cap, as a % of the player width (also sets `--vv-card-max-width`) |
+| `nextLabel` | string | `"Next →"` | Label for the in-card Next button |
+| `prevLabel` | string | `"←"` | Label for the in-card Back button |
+| `startLabel` | string | `"Start →"` | Label for the centered Start button on the dimmed first frame |
+| `cardBg` | string | `""` | Card background — sets `--vv-card-bg` |
+| `cardFg` | string | `""` | Card text color — sets `--vv-card-fg` |
+| `nextBg` | string | `""` | Next button background — sets `--vv-next-bg` |
+| `nextFg` | string | `""` | Next button text color — sets `--vv-next-fg` |
+| `nextBorder` | string | `""` | Next button border — sets `--vv-next-border` |
+| `font` | string | `""` | Card font — sets `--vv-card-font` |
+| `dim` | string\|number | `""` | Overlay dim — a `0..1` number = black at that opacity; or any CSS color. Sets `--vv-overlay-bg` |
+
+Card text is rendered as a **markdown subset**: headings, ordered/unordered lists, horizontal rules, paragraphs, plus inline `**bold**`, `*italic*`, `` `code` ``, `~~strike~~` and `[links](url)`. Input is HTML-escaped first, so raw HTML never survives (and `javascript:` links are neutralised). The whole card is clickable to advance; the **Next** / **Back** buttons and dots navigate explicitly, and the **×** drops to a plain video player (continuous mode — cards then show only for their cue duration, with no dimming).
+
+**Start screen:** before playback begins, both modes show the dimmed first frame with a prominent, centered **Start →** button (styled like **Next** but 20% larger, placed directly on the frame — no card). Clicking it (or the frame, or pressing Space) begins: stepped mode advances to the first card, continuous mode clears the dim and plays. Skipped when `autoplay` (continuous) or `startSegment` is set.
+
+**Auto-fit:** cards grow up to `maxWidth` to fit the subtitle (the **Next** button never wraps), then — if the content still overflows the space the card's anchor leaves toward the edges — the whole card (text and buttons together) scales down to fit, no smaller than `minScale`. Re-runs on container resize / fullscreen.
+
+Web-component attributes mirror these option names in kebab-case: `nav`, `closable`, `dots`, `counter`, `auto-fit`, `min-scale`, `max-width`, `next-label`, `prev-label`, `start-label`, `card-bg`, `card-fg`, `next-bg`, `next-fg`, `next-border`, `font`, `dim`.
 
 ## Methods
 
@@ -163,6 +190,7 @@ When `x`/`y`/`w` are absent, placement falls back to the cue's native `position`
 | `toggle()` | Play/pause toggle (stepped: advance or pause mid-travel). |
 | `next()` | Jump to the next segment. |
 | `prev()` | Jump to the previous segment. |
+| `close()` | Dismiss the cards: switch to continuous mode and resume playback (no-op in continuous). |
 | `seekTo(time)` | Seek to an absolute time in seconds. |
 | `goToSegment(i)` | Seek to segment `i` and show its card. |
 | `setMode(mode)` | Switch `"continuous"` / `"stepped"` live. |
@@ -188,6 +216,7 @@ All events dispatch on the container element with the `vexyvlip:` prefix and bub
 | `vexyvlip:cardshow` | `{ index, segment }` |
 | `vexyvlip:cardhide` | `{}` |
 | `vexyvlip:stop` | `{ index }` — stepped mode: reached a stop point |
+| `vexyvlip:close` | `{}` — the × was used to drop to plain video mode |
 | `vexyvlip:error` | `{ error, phase }` |
 
 ## Theming
@@ -196,15 +225,23 @@ All visual knobs are CSS custom properties on `.vexy-vlip` (or `:host` in the we
 
 | Property | Default | Controls |
 | --- | --- | --- |
-| `--vv-card-bg` | `rgba(12,18,28,.9)` | Card background |
-| `--vv-card-fg` | `#ffffff` | Card text color |
+| `--vv-card-bg` | `#ffffff` | Card background |
+| `--vv-card-fg` | `#1d2430` | Card text color |
 | `--vv-card-font` | `inherit` | Card font |
-| `--vv-card-padding` | `14px 18px` | Card padding |
-| `--vv-card-radius` | `12px` | Card border radius |
+| `--vv-card-padding` | `20px 24px` | Card padding |
+| `--vv-card-radius` | `16px` | Card border radius |
 | `--vv-card-border` | `0` | Card border |
-| `--vv-card-shadow` | `0 6px 24px rgba(0,0,0,.4)` | Card box-shadow |
-| `--vv-card-max-width` | `44%` | Maximum card width |
-| `--vv-accent` | `#4ea1ff` | Dot indicator and link color |
+| `--vv-card-shadow` | `0 12px 38px rgba(0,0,0,.34)` | Card box-shadow |
+| `--vv-card-max-width` | `72%` | Maximum card width (also set by the `maxWidth` option) |
+| `--vv-card-bg-stepped` | `var(--vv-card-bg)` | Card background in stepped mode |
+| `--vv-accent` | `#2f6fed` | Link color (and default dot-active color) |
+| `--vv-next-bg` | `#ffffff` | In-card Next button background (outlined pill by default) |
+| `--vv-next-fg` | `#1d2430` | In-card Next button text color |
+| `--vv-next-border` | `rgba(0,0,0,.82)` | In-card Next button border |
+| `--vv-close-fg` | `var(--vv-card-fg)` | Close (×) button color |
+| `--vv-dot` | `rgba(255,255,255,.45)` | Step-dot color |
+| `--vv-dot-active` | `var(--vv-accent)` | Active step-dot color |
+| `--vv-overlay-bg` | `rgba(0,0,0,.7)` | Dimming overlay behind a resting card |
 | `--vv-controls-bg` | `rgba(0,0,0,.55)` | Control bar background |
 
 Per-cue JSON fields (`bg`, `fg`, `shadow`, etc.) override these via inline styles on individual cards.

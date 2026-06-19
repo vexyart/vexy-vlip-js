@@ -9,16 +9,24 @@ export const STYLE_ID = "vexy-vlip-styles";
 
 export const CSS = `
 .vexy-vlip {
-  --vv-card-bg: rgba(12, 18, 28, 0.9);
-  --vv-card-fg: #ffffff;
+  --vv-card-bg: #ffffff;
+  --vv-card-fg: #1d2430;
   --vv-card-font: inherit;
-  --vv-card-padding: 14px 18px;
-  --vv-card-radius: 12px;
+  --vv-card-padding: 20px 24px;
+  --vv-card-radius: 16px;
   --vv-card-border: 0;
-  --vv-card-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
-  --vv-card-max-width: 44%;
-  --vv-accent: #4ea1ff;
+  --vv-card-shadow: 0 12px 38px rgba(0, 0, 0, 0.34);
+  --vv-card-max-width: 72%;
+  --vv-accent: #2f6fed;
   --vv-controls-bg: rgba(0, 0, 0, 0.55);
+  --vv-overlay-bg: rgba(0, 0, 0, 0.7);
+  --vv-card-bg-stepped: var(--vv-card-bg);
+  --vv-next-bg: #ffffff;
+  --vv-next-fg: #1d2430;
+  --vv-next-border: rgba(0, 0, 0, 0.82);
+  --vv-close-fg: var(--vv-card-fg);
+  --vv-dot: rgba(255, 255, 255, 0.45);
+  --vv-dot-active: var(--vv-accent);
   position: relative;
   display: inline-block;
   max-width: 100%;
@@ -32,6 +40,15 @@ export const CSS = `
   height: auto;
   max-width: 100%;
 }
+.vexy-vlip__overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--vv-overlay-bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+.vexy-vlip[data-overlay="true"] .vexy-vlip__overlay { opacity: 1; }
 .vexy-vlip__cards {
   position: absolute;
   inset: 0;
@@ -45,6 +62,7 @@ export const CSS = `
   pointer-events: auto;
 }
 .vexy-vlip__body {
+  position: relative;
   box-sizing: border-box;
   padding: var(--vv-card-padding);
   border-radius: var(--vv-card-radius);
@@ -54,6 +72,7 @@ export const CSS = `
   font: var(--vv-card-font);
   box-shadow: var(--vv-card-shadow);
   text-align: start;
+  overflow-wrap: break-word;
   opacity: 0;
   transform: translateY(0);
   transition: opacity 0.28s ease, transform 0.28s ease;
@@ -61,17 +80,140 @@ export const CSS = `
 }
 .vexy-vlip__body code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.08);
   padding: 0.1em 0.35em;
   border-radius: 5px;
   font-size: 0.92em;
 }
 .vexy-vlip__body a { color: var(--vv-accent); }
+/* Rendered markdown blocks: collapse the outer margins so the panel padding
+   stays even, and keep headings / lists readable. */
+.vexy-vlip__body > :first-child { margin-top: 0; }
+.vexy-vlip__body h1,
+.vexy-vlip__body h2,
+.vexy-vlip__body h3,
+.vexy-vlip__body h4,
+.vexy-vlip__body h5,
+.vexy-vlip__body h6 { margin: 0.5em 0 0.3em; line-height: 1.25; }
+.vexy-vlip__body p { margin: 0.5em 0; }
+.vexy-vlip__body ul,
+.vexy-vlip__body ol { margin: 0.5em 0; padding-inline-start: 1.4em; }
+.vexy-vlip__body hr { border: 0; border-top: 1px solid rgba(0, 0, 0, 0.12); margin: 0.7em 0; }
+/* In-card step navigation (stepped mode): optional counter on the left, Back +
+   Next on the right. The row never wraps, so the Next label keeps its arrow on
+   one line; auto-fit scales the whole card down if the row can't fit. Hidden in
+   continuous mode by the data-mode selector below. */
+.vexy-vlip__cardnav {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  flex-wrap: nowrap;
+}
+.vexy-vlip[data-mode="stepped"] .vexy-vlip__cardnav { display: flex; }
+.vexy-vlip__counter {
+  font-size: 0.82em;
+  opacity: 0.5;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.vexy-vlip__navspacer { flex: 1 1 auto; min-width: 0; }
+.vexy-vlip__prev,
+.vexy-vlip__next {
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+.vexy-vlip__prev {
+  border: 0;
+  background: transparent;
+  color: var(--vv-card-fg);
+  opacity: 0.7;
+  padding: 6px 8px;
+  font-size: 1.25em;
+  border-radius: 8px;
+}
+.vexy-vlip__prev:hover { opacity: 1; }
+/* Next: an outlined pill by default (white ground, dark hairline border), per
+   the reference design. Set --vv-next-bg / --vv-next-border for a filled look. */
+.vexy-vlip__next {
+  background: var(--vv-next-bg);
+  color: var(--vv-next-fg);
+  border: 1.5px solid var(--vv-next-border);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.95em;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+.vexy-vlip__next:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+}
+/* Close (×): top-right of the card; dismisses the cards to plain video mode. */
+.vexy-vlip__close {
+  position: absolute;
+  top: 10px;
+  right: 11px;
+  display: none;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--vv-close-fg);
+  opacity: 0.5;
+  cursor: pointer;
+  font-size: 0.95em;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+.vexy-vlip__close:hover { opacity: 1; }
+.vexy-vlip[data-mode="stepped"] .vexy-vlip__card--closable .vexy-vlip__close { display: block; }
+/* Reserve top-right room so the title / first line never slides under the ×. */
+.vexy-vlip[data-mode="stepped"] .vexy-vlip__card--closable .vexy-vlip__body { padding-right: 32px; }
+/* Start CTA: a prominent button centered over the dimmed first frame (both
+   modes), styled like the Next pill but 20% larger. Shown via data-start. */
+.vexy-vlip__start {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  white-space: nowrap;
+  background: var(--vv-next-bg);
+  color: var(--vv-next-fg);
+  border: 1.8px solid var(--vv-next-border);
+  border-radius: 999px;
+  padding: 12px 26px;
+  font-size: 1.14em;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+.vexy-vlip__start:hover {
+  filter: brightness(0.97);
+  transform: translate(-50%, -50%) scale(1.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.vexy-vlip[data-start="true"] .vexy-vlip__start { display: block; }
 .vexy-vlip__card--in .vexy-vlip__body { opacity: 1; transform: translateY(0); }
 .vexy-vlip__card[data-enter="slide-up"] .vexy-vlip__body { transform: translateY(14px); }
 .vexy-vlip__card[data-enter="slide-down"] .vexy-vlip__body { transform: translateY(-14px); }
 .vexy-vlip__card--in[data-enter="slide-up"] .vexy-vlip__body,
 .vexy-vlip__card--in[data-enter="slide-down"] .vexy-vlip__body { transform: translateY(0); }
+/* Stepped mode: cards read like full subtitle slides — more opaque panel and
+   larger type — paired with the dimming overlay behind them. */
+.vexy-vlip[data-mode="stepped"] .vexy-vlip__body {
+  background: var(--vv-card-bg-stepped);
+  font-size: 1.15em;
+}
 .vexy-vlip__tap {
   position: absolute;
   inset: 0;
@@ -86,21 +228,6 @@ export const CSS = `
   color: transparent;
 }
 .vexy-vlip:not([data-mode="stepped"]) .vexy-vlip__tap { display: none; }
-.vexy-vlip__hint {
-  position: absolute;
-  left: 50%;
-  bottom: 14px;
-  transform: translateX(-50%);
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: var(--vv-controls-bg);
-  color: #fff;
-  font-size: 13px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-.vexy-vlip__hint--show { opacity: 0.85; }
 .vexy-vlip__controls {
   position: absolute;
   left: 0;
@@ -149,12 +276,28 @@ export const CSS = `
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.35);
+  background: var(--vv-dot);
   cursor: pointer;
   transition: background 0.2s ease, transform 0.2s ease;
 }
-.vexy-vlip__dot--active { background: var(--vv-accent); transform: scale(1.25); }
+.vexy-vlip__dot--active { background: var(--vv-dot-active); transform: scale(1.25); }
 .vexy-vlip__time { font-variant-numeric: tabular-nums; font-size: 12px; opacity: 0.85; }
+/* Stepped mode: the bottom bar is reduced to just the step dots — no play,
+   prev/next, time, mute or fullscreen buttons. The dots stay visible at all
+   times so the viewer can jump between steps; the Back / Next affordances live
+   inside the card itself. */
+.vexy-vlip[data-mode="stepped"] .vexy-vlip__controls {
+  opacity: 1;
+  pointer-events: auto;
+  background: transparent;
+  justify-content: center;
+}
+.vexy-vlip[data-mode="stepped"] .vexy-vlip__btn,
+.vexy-vlip[data-mode="stepped"] .vexy-vlip__time { display: none; }
+.vexy-vlip[data-mode="stepped"] .vexy-vlip__dots {
+  flex: 0 0 auto;
+  justify-content: center;
+}
 @media (prefers-reduced-motion: reduce) {
   .vexy-vlip__body { transition: opacity 0.001s; transform: none !important; }
 }

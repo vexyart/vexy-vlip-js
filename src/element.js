@@ -11,8 +11,6 @@ import { shadowCss } from "./styles.js";
 // custom element) can serve `import { VexyVlip } from ".../vexy-vlip.element.js"`.
 export { VexyVlip } from "./player.js";
 
-const BOOL_DEFAULT_TRUE = new Set(["controls", "keyboard", "hint"]);
-
 /** Parse a boolean-ish attribute (presence = true unless value is "false"). */
 function boolAttr(el, name, dflt) {
   if (!el.hasAttribute(name)) return dflt;
@@ -35,7 +33,24 @@ function readOptions(el) {
     muted: boolAttr(el, "muted", false),
     controls: boolAttr(el, "controls", true),
     keyboard: boolAttr(el, "keyboard", true),
-    hint: boolAttr(el, "hint", true),
+    overlay: boolAttr(el, "overlay", true),
+    nav: boolAttr(el, "nav", true),
+    dots: boolAttr(el, "dots", true),
+    counter: boolAttr(el, "counter", false),
+    closable: boolAttr(el, "closable", true),
+    autoFit: boolAttr(el, "auto-fit", true),
+    minScale: el.hasAttribute("min-scale") ? Number(el.getAttribute("min-scale")) : undefined,
+    maxWidth: el.hasAttribute("max-width") ? Number(el.getAttribute("max-width")) : undefined,
+    nextLabel: el.getAttribute("next-label") ?? undefined,
+    prevLabel: el.getAttribute("prev-label") ?? undefined,
+    startLabel: el.getAttribute("start-label") ?? undefined,
+    cardBg: el.getAttribute("card-bg") || "",
+    cardFg: el.getAttribute("card-fg") || "",
+    nextBg: el.getAttribute("next-bg") || "",
+    nextFg: el.getAttribute("next-fg") || "",
+    nextBorder: el.getAttribute("next-border") || "",
+    font: el.getAttribute("font") || "",
+    dim: el.getAttribute("dim") || "",
     sanitize: boolAttr(el, "sanitize", false),
     injectStyles: false,
   };
@@ -113,6 +128,7 @@ export class VexyVlipElement extends HTMLElement {
   toggle() { return this._vlip?.toggle(); }
   next() { return this._vlip?.next(); }
   prev() { return this._vlip?.prev(); }
+  close() { return this._vlip?.close(); }
   seekTo(t) { return this._vlip?.seekTo(t); }
   goToSegment(i) { return this._vlip?.goToSegment(i); }
   showCard(i) { return this._vlip?.showCard(i); }

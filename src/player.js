@@ -35,7 +35,28 @@ const DEFAULTS = {
   startSegment: null,
   keyboard: true,
   sanitize: false,
-  hint: true,
+  overlay: true, // stepped mode: dim the video behind a resting card
+  nav: true, // stepped mode: in-card Back / Next
+  counter: false, // show the "n/total" step counter in the card nav
+  dots: true, // show the step-dots bar
+  closable: true, // stepped mode: show the × that drops to plain video mode
+  nextLabel: "Next →",
+  prevLabel: "←",
+  startLabel: "Start →", // centered CTA shown over the dimmed first frame
+  // Auto-fit: grow cards to fit their text, then scale the whole card down if it
+  // still overflows the space the anchor leaves toward the edges.
+  autoFit: true,
+  minScale: 0.4, // never scale a card below this factor (readability floor)
+  maxWidth: 72, // grow cap, as a % of the player width (also sets --vv-card-max-width)
+  // Theme knobs — when set, written as CSS custom properties on the root so
+  // they cascade into the card / controls (each maps to a --vv-* variable).
+  cardBg: "", // --vv-card-bg (and stepped card bg)
+  cardFg: "", // --vv-card-fg
+  nextBg: "", // --vv-next-bg
+  nextFg: "", // --vv-next-fg
+  nextBorder: "", // --vv-next-border
+  font: "", // --vv-card-font
+  dim: "", // --vv-overlay-bg; a 0..1 number is read as black at that opacity
   injectStyles: true,
 };
 
@@ -58,6 +79,7 @@ export class VexyVlip {
     this.stops = [];
     this._destroyed = false;
     this._ready = false;
+    this._started = false; // becomes true once the viewer dismisses the Start CTA
     this._target = null; // stepped: time we are travelling toward
     this._pendingSeg = -1; // stepped: segment to reveal at _target
     this._stepIndex = -1; // stepped: index of the card we are resting on (-1 = before the first)
@@ -95,6 +117,7 @@ export class VexyVlip {
     this.root.classList.add("vexy-vlip");
     this.root.dataset.mode = this._mode;
     this.root.tabIndex = this.root.tabIndex >= 0 ? this.root.tabIndex : 0;
+    this._applyTheme();
 
     const v = this.video;
     v.classList.add("vexy-vlip__video");
@@ -115,22 +138,69 @@ export class VexyVlip {
     this.tap.setAttribute("aria-label", "Advance to the next step");
     this.root.appendChild(this.tap);
 
+    // Dimming overlay shown (stepped mode) while a card rests on screen.
+    // Sits above the video + tap layer but below the cards and controls
+    // (purely a function of DOM order). Always present; visibility is driven by
+    // the `data-overlay` attribute from CSS.
+    if (this.opts.overlay) {
+      this.overlay = doc.createElement("div");
+      this.overlay.className = "vexy-vlip__overlay";
+      this.overlay.setAttribute("aria-hidden", "true");
+      this.root.appendChild(this.overlay);
+    }
+    this.root.dataset.overlay = "false";
+
     this.cardsLayer = doc.createElement("div");
     this.cardsLayer.className = "vexy-vlip__cards";
     this.cardsLayer.setAttribute("aria-live", "polite");
     this.root.appendChild(this.cardsLayer);
     this.layer = new CardLayer(this.cardsLayer, {
       sanitize: this.opts.sanitize ? defaultSanitize : undefined,
+      close: !!this.opts.closable,
+      nav: {
+        enabled: !!this.opts.nav,
+        counter: this.opts.counter !== false,
+        nextLabel: this.opts.nextLabel,
+        prevLabel: this.opts.prevLabel,
+      },
+      fit: {
+        enabled: this.opts.autoFit !== false,
+        minScale: Number(this.opts.minScale) || 0.4,
+        maxWidthPct: Number(this.opts.maxWidth) || 72,
+      },
     });
 
-    if (this.opts.hint) {
-      this.hint = doc.createElement("div");
-      this.hint.className = "vexy-vlip__hint";
-      this.hint.textContent = "Click to continue";
-      this.root.appendChild(this.hint);
-    }
-
     if (this.opts.controls) this._buildControls();
+
+    // Start CTA: a prominent button centered over the dimmed first frame, shown
+    // (both modes) until the viewer begins. Appended last so it sits on top.
+    this.startBtn = doc.createElement("button");
+    this.startBtn.className = "vexy-vlip__start";
+    this.startBtn.type = "button";
+    this.startBtn.textContent = this.opts.startLabel ?? DEFAULTS.startLabel;
+    this.root.appendChild(this.startBtn);
+    this.root.dataset.start = "false";
+  }
+
+  /** Write any provided theme options onto the root as CSS custom properties. */
+  _applyTheme() {
+    const set = (name, val) => {
+      if (val != null && val !== "") this.root.style.setProperty(name, String(val));
+    };
+    set("--vv-card-bg", this.opts.cardBg);
+    set("--vv-card-bg-stepped", this.opts.cardBg);
+    set("--vv-card-fg", this.opts.cardFg);
+    set("--vv-next-bg", this.opts.nextBg);
+    set("--vv-next-fg", this.opts.nextFg);
+    set("--vv-next-border", this.opts.nextBorder);
+    set("--vv-card-font", this.opts.font);
+    if (this.opts.maxWidth) set("--vv-card-max-width", `${Number(this.opts.maxWidth)}%`);
+    // `dim` may be a colour or a 0..1 opacity (→ black at that opacity).
+    const dim = this.opts.dim;
+    if (dim != null && dim !== "") {
+      const n = Number(dim);
+      set("--vv-overlay-bg", Number.isFinite(n) && n >= 0 && n <= 1 ? `rgba(0, 0, 0, ${n})` : dim);
+    }
   }
 
   _buildControls() {
@@ -168,7 +238,7 @@ export class VexyVlip {
   }
 
   _buildDots() {
-    if (!this._dots) return;
+    if (!this._dots || !this.opts.dots) return;
     this._dots.replaceChildren();
     this.cards.forEach((c, i) => {
       const d = this.doc.createElement("button");
@@ -191,12 +261,20 @@ export class VexyVlip {
     v.addEventListener("pause", () => this._reflect(), sig);
     v.addEventListener("seeked", () => this._updateUi(), sig);
 
+    // The Start CTA begins playback (both modes).
+    this.startBtn.addEventListener("click", (e) => { e.preventDefault(); this._begin(); }, sig);
+
     // Tap layer (stepped) and clicking the video both advance/toggle.
     this.tap.addEventListener("click", (e) => { this.toggle(); e.preventDefault(); }, sig);
 
-    // Clicking a card advances (unless the click landed on a link/button).
+    // Card clicks: the in-card Next/Back buttons drive navigation explicitly;
+    // a click anywhere else on the card advances (stepped mode), so the whole
+    // card is a "next" affordance. Links and other buttons are left alone.
     this.cardsLayer.addEventListener("click", (e) => {
       const t = e.target;
+      if (t && t.closest(".vexy-vlip__close")) { e.preventDefault(); this.close(); return; }
+      if (t && t.closest(".vexy-vlip__next")) { e.preventDefault(); this.next(); return; }
+      if (t && t.closest(".vexy-vlip__prev")) { e.preventDefault(); this.prev(); return; }
       if (t && (t.closest("a") || t.closest("button:not(.vexy-vlip__tap)"))) return;
       if (this._mode === "stepped") this.toggle();
     }, sig);
@@ -279,8 +357,17 @@ export class VexyVlip {
     }
     this._updateUi();
     this._emit("ready", { segments: this.cards.length });
-    if (this._mode === "continuous" && this.opts.autoplay) this.play();
-    else this._showHint(this._mode === "stepped");
+    if (this._mode === "continuous" && this.opts.autoplay) {
+      this._started = true;
+      this.play();
+    } else if (startSeg != null && this.cards[startSeg]) {
+      // Explicit start segment: open already positioned, no Start gate.
+      this._started = true;
+      this._showHint(this._mode === "stepped");
+    } else {
+      // The very beginning: dim the first frame and show the Start CTA (both modes).
+      this._showStart(true);
+    }
   }
 
   // ---- frame watcher -----------------------------------------------------
@@ -452,6 +539,7 @@ export class VexyVlip {
   // ---- public API --------------------------------------------------------
 
   play() {
+    if (!this._started && this._ready) { this._begin(); return; }
     if (this._mode === "stepped") this._advance();
     else this._playNative();
   }
@@ -465,6 +553,7 @@ export class VexyVlip {
   }
 
   toggle() {
+    if (!this._started && this._ready) { this._begin(); return; }
     if (this._mode === "stepped") {
       if (!this.video.paused || this._ease) this.pause();
       else this._advance();
@@ -475,6 +564,7 @@ export class VexyVlip {
   }
 
   next() {
+    if (!this._started && this._ready) { this._begin(); return; }
     if (this._mode === "stepped") {
       this._advance();
     } else {
@@ -503,6 +593,9 @@ export class VexyVlip {
 
   goToSegment(i) {
     if (!this.cards[i]) return;
+    // Jumping to a step also dismisses the Start CTA.
+    this._started = true;
+    this.root.dataset.start = "false";
     this._cancelEase();
     this._target = null;
     this._pendingSeg = -1;
@@ -555,6 +648,43 @@ export class VexyVlip {
     if (EASE[easing]) this.opts.easing = easing;
   }
 
+  /** Show/hide the Start CTA over a dimmed first frame (both modes). */
+  _showStart(on) {
+    this.root.dataset.start = on ? "true" : "false";
+    if (on) this._setOverlay(true);
+  }
+
+  /**
+   * Begin playback from the Start CTA (or the first tap / key / play() call):
+   * clear the CTA and start — stepped mode advances to the first card (which
+   * re-dims at rest), continuous mode clears the dim and plays through.
+   */
+  _begin() {
+    if (this._started || !this._ready) return;
+    this._started = true;
+    this.root.dataset.start = "false";
+    if (this._mode === "stepped") {
+      this._advance();
+    } else {
+      this._setOverlay(false);
+      this._playNative();
+    }
+  }
+
+  /**
+   * Dismiss the stepped-mode cards and drop to a plain video player: switch to
+   * continuous mode (full controls, no dimming — cards now appear only for their
+   * cue duration) and resume playback from the current time. No-op in continuous
+   * mode. Wired to the in-card × button when `closable` is on.
+   */
+  close() {
+    if (this._mode !== "stepped") return;
+    this.setMode("continuous"); // hides the card, clears overlay, shows controls
+    this._setOverlay(false);
+    this._playNative();
+    this._emit("close", {});
+  }
+
   destroy() {
     this._destroyed = true;
     this._stopLoop();
@@ -569,7 +699,7 @@ export class VexyVlip {
     this.layer.clear();
     // Remove the chrome we created (leave the video element in place; it may
     // have been supplied by the caller).
-    for (const el of [this.tap, this.cardsLayer, this.hint, this._controlsBar]) {
+    for (const el of [this.tap, this.overlay, this.cardsLayer, this._controlsBar, this.startBtn]) {
       el?.remove();
     }
     this._emit("destroy", {});
@@ -596,9 +726,21 @@ export class VexyVlip {
     else el.requestFullscreen?.();
   }
 
+  // Resting on a step (stepped mode) dims the video behind the card; advancing
+  // clears it. Continuous mode never dims. (Kept as `_showHint` for its many
+  // call sites — the floating hint is gone; the in-card nav is the affordance.)
   _showHint(show) {
-    if (!this.hint) return;
-    this.hint.classList.toggle("vexy-vlip__hint--show", !!show);
+    this._setOverlay(this._mode === "stepped" && !!show);
+  }
+
+  /**
+   * Toggle the dimming overlay. When shown, the video is paused — the overlay
+   * only ever appears while resting on a card, so a dimmed-but-playing
+   * state should never occur.
+   */
+  _setOverlay(show) {
+    this.root.dataset.overlay = show ? "true" : "false";
+    if (show && !this.video.paused) this.video.pause();
   }
 
   _reflect() {

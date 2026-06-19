@@ -4,6 +4,34 @@
 
 All notable changes to this project are documented here.
 
+## [0.2.0] — 2026-06
+
+A stop-motion redesign so stepped mode reads like a guided, card-based tutorial: white cards, rendered markdown, and in-card navigation over a dimmed video.
+
+### Added
+
+- **Stepped-mode dimming overlay** (`overlay` option / attribute, default on): while resting on a card the video is dimmed behind a `--vv-overlay-bg` layer and paused. The dim is customizable via the `dim` option (a `0..1` opacity, or any CSS color) and `--vv-overlay-bg` (default `rgba(0,0,0,0.7)`).
+- **In-card step navigation** (`nav` option, default on): each card carries a footer with a **Back** (`←`) button that jumps to the previous subtitle and an outlined-pill **Next →** button. The whole card is also clickable to advance. Labels are customizable via `nextLabel` / `prevLabel`. The footer never wraps — the **Next** button stays on one line.
+- **Start screen** (`startLabel` option / `start-label` attribute): before playback begins, both modes show the dimmed first frame with a prominent, centered **Start →** button placed directly on the frame (no card), styled like **Next** but 20% larger. Clicking it — or the frame, or pressing Space — begins (stepped advances to the first card; continuous clears the dim and plays). Skipped when `autoplay` (continuous) or `startSegment` is set.
+- **In-card close button** (`closable` option, default on): a **×** in the card's top-right dismisses the cards and drops to a plain video player — switches to continuous mode and resumes playback, so cards then appear only for their cue duration with no dimming. Emits `vexyvlip:close`; exposed as a `close()` method.
+- **Auto-fit / auto-scale** (`autoFit`, default on): cards grow up to `maxWidth` (default 72% of the player) to fit the subtitle, then — if the content still overflows the space the anchor leaves toward the edges — the whole card (text and buttons together) scales down to fit, no smaller than `minScale` (default 0.4). Pivots on the card's anchor so placement is preserved, and re-runs on container resize / fullscreen via a `ResizeObserver`.
+- **Optional step counter** (`counter` option): the `n/total` counter is now **off by default** and opt-in.
+- **Native WebVTT positioning** — `position`/`line` now accept the standard `position-align` / `line-align` sub-values (e.g. `position:82%,line-right line:22%,end`), resolved to the nine-point anchor. The whole anchor vocabulary is now expressible in pure WebVTT, so `testdata/playlines.vtt` (and `scripts/capture-playlines.mjs`) no longer emit JSON — JSON is reserved for per-cue styling. (Side effect: native cue-setting cards now honour their alignment instead of always anchoring bottom — e.g. `sample.vtt`'s "top-left" card now actually sits top-left.)
+- **Fuller markdown rendering** in cards: headings, ordered/unordered lists, horizontal rules, and paragraphs, on top of the existing inline `**bold**`, `*italic*`, `` `code` ``, plus new `~~strike~~` and `[links](url)`. Still HTML-escaped first (XSS-safe), and `javascript:`/`data:` link targets are neutralised.
+- **Theme options** mapped to CSS custom properties so colors and font are configurable without a stylesheet: `cardBg`, `cardFg`, `nextBg`, `nextFg`, `nextBorder`, `font`, `dim` (and matching kebab-case web-component attributes). New properties: `--vv-next-bg`, `--vv-next-fg`, `--vv-next-border`, `--vv-close-fg`, `--vv-dot`, `--vv-dot-active`.
+- **`dots` option** (default on) to show/hide the step-dots bar.
+
+### Changed
+
+- **Cards are white by default** (`--vv-card-bg: #ffffff`, `--vv-card-fg: #1d2430`), in both continuous and stepped modes, with a softer shadow, roomier padding (`20px 24px`), a 16px radius, and a wider default max-width (72%).
+- **The Next button is an outlined pill by default** (white ground, dark hairline border, dark bold text) per the reference design — set `--vv-next-bg` / `--vv-next-border` (or the `nextBg` / `nextBorder` options) for a filled look. The Start CTA reuses the same `--vv-next-*` theme.
+- **The close (×) button is smaller** and more subtle.
+- **Stepped-mode control bar reduced to the step dots only** — play, prev/next, time, mute, and fullscreen are hidden (keyboard shortcuts still work); the dots stay visible for jumping between steps.
+
+### Removed
+
+- **The floating "Click to continue" hint** (and the `hint` option / `--vv-hint-bg` / `--vv-hint-fg`) — superseded by the in-card **Next →** button.
+
 ## [0.1.0] — 2026-06
 
 ### Added
