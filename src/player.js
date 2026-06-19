@@ -825,6 +825,7 @@ export class VexyVlip {
     if (this._mode !== "stepped") return;
     this.setMode("continuous"); // hides the card, clears overlay, shows controls
     this._setOverlay(false);
+    this._focusRoot(); // the × just hid with its card — keep keyboard nav alive
     this._playNative();
     this._emit("close", {});
   }
