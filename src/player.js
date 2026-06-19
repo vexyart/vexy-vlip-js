@@ -778,11 +778,26 @@ export class VexyVlip {
     this._started = true;
     this.root.dataset.started = "true";
     this._showCta(null);
+    // The CTA button just hid (display:none), which drops focus to <body> — so
+    // move focus to the player root, where the keyboard handler lives, or the
+    // ←/→/Space keys would no longer reach it. (Clicking the video tap already
+    // keeps focus inside the root, which is why that path worked.)
+    this._focusRoot();
     if (this._mode === "stepped") {
       this._advance();
     } else {
       this._setOverlay(false);
       this._playNative();
+    }
+  }
+
+  /** Move keyboard focus to the player root (no scroll), for ←/→/Space nav. */
+  _focusRoot() {
+    if (!this.opts.keyboard) return;
+    try {
+      this.root.focus({ preventScroll: true });
+    } catch {
+      try { this.root.focus(); } catch { /* ignore */ }
     }
   }
 
