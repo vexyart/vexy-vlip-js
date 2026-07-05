@@ -6,6 +6,13 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Maintenance (modernization pass)
+
+- **npm publish workflow** — added `.github/workflows/publish.yml`: publishing a GitHub Release from a `vX.Y.Z` tag stamps the version and runs `npm publish --provenance`. A comment documents the npm trusted-publishing / `NPM_TOKEN` secret setup.
+- **README trimmed to 200 lines** — the full option, JSON-field, and theming tables moved into `docs/reference.md`; README keeps the quick start, methods, and events. Corrected the stale test counts (29 unit + 19 e2e).
+- **`CLAUDE.md`** added with a source map, build/test/release notes, and gotchas.
+- **Project icon** — `docs/assets/icon.png`, a single-line Steinberg-style illustration (hand tapping a play triangle as cards pop up), shown at the top of the README.
+
 ### Added
 
 - **Replay CTA** — after the video ends (and `loop` is off), a **Replay ↻** button appears over the dimmed first frame, mirroring the Start screen. Clicking it (or the frame / Space) restarts from the top. New `replayLabel` option / `replay-label` attribute, `replay()` method, and `vexyvlip:replay` event.

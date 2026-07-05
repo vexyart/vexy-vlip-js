@@ -26,6 +26,19 @@ decodes.
       Apple Events" is enabled; used a system screencapture of the window instead.
 - [x] 6. NPM prep (`npm pack --dry-run` clean); CHANGELOG; commit; re-tag v1.0.0.
 
+## Modernization pass (portfolio effort) — done
+
+- [x] Add tag/release-triggered npm publish workflow (`.github/workflows/publish.yml`)
+- [x] Trim README to ≤200 lines; move full option/JSON/theming tables to `docs/reference.md`
+- [x] Fix stale test counts in README (29 unit + 19 e2e)
+- [x] Add `CLAUDE.md` (source map + release notes)
+- [x] Generate `docs/assets/icon.png` (monochrome single-line illustration, <500 KB)
+- [x] Update CHANGELOG / TODO for the pass; unit (29) + e2e (19) green, build clean
+
+## Bigger ideas (unstarted)
+
+- [ ] Add a MaterialX `src_docs/` pipeline (`src_docs/mkdocs.yaml` + `src_docs/md/`) compiling to `docs/`, per the portfolio doc-tier plan; today `docs/` is the raw demo site plus `docs/reference.md`.
+
 ## Backlog
 
 - [ ] Optional MediaBunny / WebCodecs adapter for frame-exact scrubbing (replaces the rAF `currentTime` loop when the browser supports it and the source is a fragmented MP4)
