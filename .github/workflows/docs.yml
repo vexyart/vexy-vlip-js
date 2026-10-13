@@ -1,0 +1,50 @@
+# this_file: .github/workflows/docs.yml
+# Rebuild the documentation site into docs/ on every push to the default branch.
+# GitHub Pages serves docs/ at https://vexy.dev/vexy-vlip-js/.
+# The live demos in src_docs/md/ load the dist bundles, so they are rebuilt
+# from src/ (npm run build + build:docs) before the ProperDocs step.
+name: Docs
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src_docs/**"
+      - "src/**"
+      - "testdata/*.mp4"
+      - "testdata/*.vtt"
+      - "scripts/build-docs.mjs"
+      - "vite.config.js"
+      - "package.json"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build demo bundles into src_docs/md/
+        run: |
+          npm ci || npm install
+          npm run build
+          npm run build:docs
+      - uses: astral-sh/setup-uv@v6
+      - name: Build documentation
+        run: bash src_docs/build.sh
+      - name: Commit rebuilt docs/
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A docs
+          if git diff --cached --quiet; then echo "docs/ unchanged"; exit 0; fi
+          git commit -m "docs: rebuild site [skip ci]"
+          git checkout -- .  # drop regenerated src_docs/md assets so the rebase can run
+          git pull --rebase
+          git push

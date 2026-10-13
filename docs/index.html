@@ -1,145 +1,907 @@
+
 <!doctype html>
-<!-- this_file: docs/index.html -->
-<html lang="en">
+<html lang="en" class="no-js">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Vexy Vlip — interactive explainer video player</title>
-    <meta name="description" content="A single video + WebVTT becomes styled, positioned on-screen cards. Continuous playback or click-to-advance stop-motion. Zero runtime dependencies." />
-    <style>
-      :root {
-        --bg: #0a0e14; --panel: #121925; --ink: #e9eef6; --dim: #9aa7b8;
-        --accent: #4ea1ff; --line: #1f2a3a; --radius: 14px;
-      }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0; background: var(--bg); color: var(--ink);
-        font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      }
-      a { color: var(--accent); }
-      header.site { padding: 18px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--line); }
-      header.site .brand { font-weight: 800; letter-spacing: -0.02em; font-size: 18px; }
-      header.site nav { margin-left: auto; display: flex; gap: 18px; font-size: 14px; }
-      .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
-      .hero { text-align: center; padding: 56px 0 28px; }
-      .hero h1 { font-size: clamp(32px, 6vw, 56px); margin: 0 0 12px; letter-spacing: -0.03em; line-height: 1.05; }
-      .hero p.lede { font-size: clamp(17px, 2.4vw, 21px); color: var(--dim); max-width: 720px; margin: 0 auto 8px; }
-      .badge { display: inline-block; font-size: 12px; color: var(--dim); border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; margin-top: 10px; }
-      .stage { margin: 28px auto; max-width: 1000px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); box-shadow: 0 24px 60px rgba(0,0,0,.5); }
-      vexy-vlip { width: 100%; display: block; --vv-accent: var(--accent); }
-      .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin: 14px 0 4px; }
-      .controls .group { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-      .controls button { appearance: none; border: 0; background: transparent; color: var(--ink); padding: 9px 14px; cursor: pointer; font-size: 14px; }
-      .controls button[aria-pressed="true"] { background: var(--accent); color: #04121f; font-weight: 600; }
-      .controls .hint { color: var(--dim); font-size: 13px; }
-      section { padding: 40px 0; border-top: 1px solid var(--line); }
-      h2 { font-size: 26px; letter-spacing: -0.02em; }
-      .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-      .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
-      .card h3 { margin: 0 0 6px; font-size: 17px; }
-      .card p { margin: 0; color: var(--dim); font-size: 14px; }
-      .ways a.card { text-decoration: none; color: inherit; transition: border-color .2s, transform .2s; display: block; }
-      .ways a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
-      .ways .tag { font-size: 12px; color: var(--accent); }
-      pre { background: #0c121c; border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow:auto; font-size: 13px; }
-      code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-      footer { padding: 40px 24px 60px; color: var(--dim); text-align: center; border-top: 1px solid var(--line); font-size: 14px; }
-    </style>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Interactive explainer video player that turns one video and a WebVTT file into styled, positioned, click-to-advance on-screen cards.">
+      
+      
+      
+        <link rel="canonical" href="https://vexy.dev/vexy-vlip-js/">
+      
+      
+      
+        <link rel="next" href="installation/">
+      
+      
+        
+      
+      
+      
+      
+        
+        
+        
+          <link rel="icon" href="assets/images/favicon.png">
+        
+      
+      <meta name="generator" content="mkdocs-ProperDocs 1.6.7, mkdocs-materialx-10.1.8">
+    
+    
+      
+        <title>vexy-vlip-js</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.314bbef5.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.a45159b5.min.css">
+      
+    
+    
+
+    
+
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
   </head>
-  <body>
-    <header class="site">
-      <span class="brand">Vexy&nbsp;Vlip</span>
-      <nav>
-        <a href="demo-module.html">ESM</a>
-        <a href="demo-component.html">Web Component</a>
-        <a href="demo-library.html">Global</a>
-        <a href="https://github.com/vexyart/vexy-vlip-js">GitHub</a>
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo" data-mx-topbar="glass">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="toc" type="checkbox" id="__toc" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <label class="md-overlay" for="__toc"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#vexy-vlip-js" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="vexy-vlip-js" class="md-header__button md-logo" aria-label="vexy-vlip-js" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            vexy-vlip-js
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10.25 2a8.25 8.25 0 0 1 6.34 13.53l5.69 5.69a.749.749 0 0 1-.326 1.275.75.75 0 0 1-.734-.215l-5.69-5.69A8.25 8.25 0 1 1 10.25 2M3.5 10.25a6.75 6.75 0 1 0 13.5 0 6.75 6.75 0 0 0-13.5 0"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10.25 2a8.25 8.25 0 0 1 6.34 13.53l5.69 5.69a.749.749 0 0 1-.326 1.275.75.75 0 0 1-.734-.215l-5.69-5.69A8.25 8.25 0 1 1 10.25 2M3.5 10.25a6.75 6.75 0 1 0 13.5 0 6.75 6.75 0 0 0-13.5 0"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
       </nav>
-    </header>
-
-    <div class="wrap">
-      <div class="hero">
-        <h1>Your video already knows what to say.</h1>
-        <p class="lede">Vexy Vlip treats a WebVTT track not as subtitles but as <strong>on-screen cards</strong> — styled, positioned, and timed. Play straight through, or click to step from one explanation to the next.</p>
-        <span class="badge">Zero runtime dependencies · ESM · Web Component · &lt;9&nbsp;kB gzipped</span>
-      </div>
-
-      <div class="stage">
-        <vexy-vlip id="hero" src="media/playlines.mp4" track="media/playlines.vtt" mode="stepped" muted video-title="Vexy Playlines · guided tour"></vexy-vlip>
-      </div>
-      <div class="controls">
-        <span class="hint">Mode:</span>
-        <div class="group" id="mode">
-          <button data-mode="stepped" aria-pressed="true">Stop-motion</button>
-          <button data-mode="continuous" aria-pressed="false">Continuous</button>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0">
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
         </div>
-        <span class="hint">Travel:</span>
-        <div class="group" id="easing">
-          <button data-ease="linear" aria-pressed="true">Linear</button>
-          <button data-ease="ease-in-out" aria-pressed="false">Eased</button>
-        </div>
-        <button class="group" id="restart" style="padding:9px 14px;cursor:pointer">↺ Restart</button>
       </div>
-      <p class="controls hint">In stop-motion mode, click the video (or press Space) to advance to the next card. This is the real <a href="https://playlines.vexy.art/">Vexy Playlines</a> editor, captured and narrated with one <code>.vtt</code> file.</p>
     </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/vexyart/vexy-vlip-js" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    vexyart/vexy-vlip-js
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
 
-    <div class="wrap">
-      <section>
-        <h2>What it does</h2>
-        <div class="grid">
-          <div class="card"><h3>Cards, not captions</h3><p>WebVTT cues render as real HTML panels — solid or translucent backdrops, custom fonts, colours, radius, borders, shadows. Crisp, accessible, responsive.</p></div>
-          <div class="card"><h3>Placed where you mean</h3><p>Use native WebVTT position/line/size hints, or put JSON in the cue payload for exact <code>x/y/w</code> and anchor control.</p></div>
-          <div class="card"><h3>Stop-motion tutorials</h3><p>Play to the next cue, pause, show the card; click to continue. Perfect for explainers and product walk-throughs.</p></div>
-          <div class="card"><h3>Optional eased travel</h3><p>Glide between stops with an ease-in-out curve — no MediaBunny, no WebCodecs, just native seeking.</p></div>
-          <div class="card"><h3>Three builds, one core</h3><p>Import the ESM module, drop in the <code>&lt;vexy-vlip&gt;</code> element, or load one global script. Same engine underneath.</p></div>
-          <div class="card"><h3>Themeable</h3><p>Every knob is a CSS custom property (<code>--vv-card-bg</code>, <code>--vv-accent</code>…). Style it to match your site.</p></div>
-        </div>
-      </section>
 
-      <section class="ways">
-        <h2>Three ways to use it</h2>
-        <div class="grid">
-          <a class="card" href="demo-module.html"><span class="tag">ESM</span><h3>JavaScript module</h3><p><code>import { VexyVlip } from "vexy-vlip-js"</code> and instantiate against any container.</p></a>
-          <a class="card" href="demo-component.html"><span class="tag">HTML</span><h3>Web Component</h3><p>Just write <code>&lt;vexy-vlip src track mode&gt;</code>. It registers itself.</p></a>
-          <a class="card" href="demo-library.html"><span class="tag">SCRIPT</span><h3>Classic global</h3><p>One <code>&lt;script&gt;</code> tag exposes <code>window.VexyVlip</code> for no-build pages.</p></a>
-        </div>
-      </section>
 
-      <section>
-        <h2>The whole tutorial is one file</h2>
-        <p style="color:var(--dim)">Timing, text, placement and style live together in the WebVTT track:</p>
-        <pre><code>WEBVTT
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="vexy-vlip-js" class="md-nav__button md-logo" aria-label="vexy-vlip-js" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
-00:02.000 --&gt; 00:03.500 position:18% line:30% size:34% align:start
-A plain card, placed with native WebVTT cue settings.
-
-00:06.000 --&gt; 00:07.500
-{ "text": "A JSON card with a custom backdrop.",
-  "x": 50, "y": 50, "anchor": "center",
-  "bg": "#10243a", "fg": "#eaf2ff", "radius": 16 }</code></pre>
-      </section>
+    </a>
+    vexy-vlip-js
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/vexyart/vexy-vlip-js" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    vexyart/vexy-vlip-js
+  </div>
+</a>
     </div>
+  
+  <ul class="md-nav__list">
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
 
-    <footer>
-      Vexy Vlip · Apache-2.0 · <a href="https://github.com/vexyart/vexy-vlip-js">github.com/vexyart/vexy-vlip-js</a> · part of the <a href="https://vexy.art/">Vexy</a> family
-    </footer>
+    
+  </span>
+  
+  
 
-    <script src="vexy-vlip.global.js?v=fb8bfbd4"></script>
-    <script>
-      const hero = document.getElementById("hero");
-      function setPressed(group, attr, val) {
-        for (const b of document.getElementById(group).querySelectorAll("button"))
-          b.setAttribute("aria-pressed", String(b.dataset[attr] === val));
-      }
-      document.getElementById("mode").addEventListener("click", (e) => {
-        const b = e.target.closest("button"); if (!b) return;
-        hero.setMode(b.dataset.mode); setPressed("mode", "mode", b.dataset.mode);
-      });
-      document.getElementById("easing").addEventListener("click", (e) => {
-        const b = e.target.closest("button"); if (!b) return;
-        hero.setEasing(b.dataset.ease); setPressed("easing", "ease", b.dataset.ease);
-      });
-      document.getElementById("restart").addEventListener("click", () => hero.goToSegment(0));
-    </script>
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc">
+      
+        <li class="md-nav__item">
+  <a href="#what-goes-in-what-comes-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What goes in, what comes out
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#two-playback-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two playback modes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#three-ways-to-load-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three ways to load it
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to go next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cue-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authoring cards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="options/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Options and attributes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="theming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How playback works
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="demos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live demos
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc">
+      
+        <li class="md-nav__item">
+  <a href="#what-goes-in-what-comes-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What goes in, what comes out
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#two-playback-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two playback modes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#three-ways-to-load-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three ways to load it
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to go next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+  
+
+
+<h1 id="vexy-vlip-js">vexy-vlip-js<a class="headerlink" href="#vexy-vlip-js" title="Permanent link">&para;</a></h1>
+<p><code>vexy-vlip-js</code> turns one video and one WebVTT file into an interactive explainer.
+Each WebVTT cue becomes an on-screen <strong>card</strong>: a real HTML panel with its own
+background, padding, corner radius, shadow and position. The library has no
+runtime dependencies and uses only native browser APIs.</p>
+<p><a class="md-button md-button--primary" href="demo.html">Open the live demo</a>
+<a class="md-button" href="installation/">Install</a></p>
+<h2 id="what-goes-in-what-comes-out">What goes in, what comes out<a class="headerlink" href="#what-goes-in-what-comes-out" title="Permanent link">&para;</a></h2>
+<p>You supply:</p>
+<ul>
+<li>a video file, for example <code>demo.mp4</code>;</li>
+<li>a WebVTT file, for example <code>demo.vtt</code>, whose cues hold the card text,
+  timing and placement.</li>
+</ul>
+<p>Vexy Vlip creates a <code>&lt;video&gt;</code> element, fetches and parses the WebVTT file
+itself, and draws each cue as an absolutely positioned card in an overlay
+layer above the video. The browser's own caption renderer is not used, so
+<code>::cue</code> styling limits do not apply.</p>
+<p>A single cue shows the idea:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>WEBVTT
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>00:02.000 --&gt; 00:05.000 position:70%,line-right line:24%,start size:38%
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>Click the **Export** button in the toolbar.
+</code></pre></div>
+<p>From 2 s to 5 s, a card appears whose top-right corner sits at 70 % of the
+video width and 24 % of its height. The card is 38 % of the video width and
+shows "Export" in bold.</p>
+<h2 id="two-playback-modes">Two playback modes<a class="headerlink" href="#two-playback-modes" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>continuous</code> (default)</td>
+<td>The video plays normally. Each card appears at its cue start and disappears at its cue end.</td>
+</tr>
+<tr>
+<td><code>stepped</code></td>
+<td>The video plays to the start of the next cue, pauses, and shows that card. The viewer clicks, presses <span class="keys"><kbd class="key-space">Space</kbd></span>, or uses the in-card <strong>Next</strong> button to continue.</td>
+</tr>
+</tbody>
+</table>
+<p>In stepped mode you can also set an <code>easing</code> such as <code>ease-in-out</code>. The player
+then moves <code>currentTime</code> between stops on a <code>requestAnimationFrame</code> loop
+instead of playing natively. See <a href="architecture/">How playback works</a>.</p>
+<h2 id="three-ways-to-load-it">Three ways to load it<a class="headerlink" href="#three-ways-to-load-it" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Build</th>
+<th>How you use it</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ESM module</td>
+<td><code>import { VexyVlip } from "vexy-vlip-js"</code></td>
+<td>Bundled apps</td>
+</tr>
+<tr>
+<td>Web Component</td>
+<td><code>&lt;vexy-vlip src="…" track="…"&gt;</code></td>
+<td>Plain HTML pages</td>
+</tr>
+<tr>
+<td>Classic global</td>
+<td><code>&lt;script src="vexy-vlip.global.js"&gt;</code> exposes <code>window.VexyVlip</code></td>
+<td>Pages with no build step</td>
+</tr>
+</tbody>
+</table>
+<p>All three share the same engine in <code>src/player.js</code>.</p>
+<h2 id="where-to-go-next">Where to go next<a class="headerlink" href="#where-to-go-next" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="installation/">Installation</a>: npm and CDN setup.</li>
+<li><a href="quickstart/">Quick start</a>: a working player in four steps.</li>
+<li><a href="cue-format/">Authoring cards</a>: plain-text cues, cue settings and JSON cards.</li>
+<li><a href="options/">Options and attributes</a>: every constructor option and its
+  matching HTML attribute.</li>
+<li><a href="api/">API reference</a>: methods, getters, events and exported helpers.</li>
+<li><a href="theming/">Theming</a>: CSS custom properties.</li>
+<li><a href="demos/">Live demos</a>: the hosted example pages.</li>
+</ul>
+<p><code>vexy-vlip-js</code> is licensed under Apache-2.0. Source:
+<a href="https://github.com/vexyart/vexy-vlip-js">github.com/vexyart/vexy-vlip-js</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+          <div class="md-top" data-md-component="top" hidden>
+  <div class="md-top__center">
+    <button type="button" class="md-top__button md-top__button--main" data-md-action="top">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+      <span>Back to top</span>
+    </button>
+    
+      
+      
+      <label class="md-top__button md-top__side md-top__side--nav" for="__drawer" >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-panel-left" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
+      </label>
+    
+    
+      
+      
+      <label class="md-top__button md-top__side md-top__side--toc" for="__toc" >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-panel-right" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg>
+      </label>
+    
+  </div>
+</div>
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+        
+          
+          <a href="installation/" class="md-footer__link md-footer__link--next" aria-label="Next: Installation">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Installation
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://jaywhj.github.io/mkdocs-materialx/" target="_blank" rel="noopener">
+      MaterialX
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "code": null, "features": ["navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "code.collapse": "Collapse", "code.download": "Download", "code.expand": "Expand remaining # lines", "code.select": "Toggle line selection", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.fc193f93.min.js"></script>
+      
+    
   </body>
 </html>

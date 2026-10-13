@@ -1,7 +1,8 @@
 // this_file: scripts/build-docs.mjs
 //
-// Assembles the GitHub-Pages site in docs/: copies the freshly built dist
+// Refreshes the live-demo assets in src_docs/md/: copies the freshly built dist
 // bundles and the testdata media next to the hand-written demo HTML pages.
+// ProperDocs (src_docs/build.sh) then copies them unchanged into docs/.
 // Run after `npm run build`. The demo .html files are committed; this script
 // only refreshes the generated assets (bundles + media), so it is safe to run
 // repeatedly.
@@ -10,7 +11,7 @@ import { mkdirSync, copyFileSync, existsSync, readdirSync, readFileSync, writeFi
 import { createHash } from "node:crypto";
 
 const root = new URL("..", import.meta.url).pathname;
-const docs = root + "docs";
+const docs = root + "src_docs/md";
 const media = docs + "/media";
 mkdirSync(media, { recursive: true });
 
@@ -24,12 +25,12 @@ function copy(from, to) {
   return true;
 }
 
-console.log("==> Copying dist bundles into docs/");
+console.log("==> Copying dist bundles into src_docs/md/");
 const bundles = readdirSync(root + "dist").filter((f) => f.endsWith(".js") || f.endsWith(".map"));
 if (bundles.length === 0) console.warn("  ! dist is empty — run `npm run build` first.");
 for (const f of bundles) copy(`${root}dist/${f}`, `${docs}/${f}`);
 
-console.log("==> Copying testdata media into docs/media/");
+console.log("==> Copying testdata media into src_docs/md/media/");
 for (const f of ["playlines.mp4", "playlines.vtt", "sample.mp4", "sample.vtt"]) {
   copy(`${root}testdata/${f}`, `${media}/${f}`);
 }
@@ -42,7 +43,7 @@ for (const f of ["playlines.mp4", "playlines.vtt", "sample.mp4", "sample.vtt"]) 
 // when the bundle content changes, so unchanged builds don't churn the HTML.
 // The `<pre><code>` copy-paste examples are left clean (their refs are escaped
 // as &lt;script&gt; / use the bare "vexy-vlip-js" specifier, so they don't match).
-console.log("==> Stamping cache-busting hashes into docs/*.html");
+console.log("==> Stamping cache-busting hashes into src_docs/md/*.html");
 const hashOf = (file) =>
   existsSync(file) ? createHash("sha256").update(readFileSync(file)).digest("hex").slice(0, 8) : null;
 const globalHash = hashOf(`${docs}/vexy-vlip.global.js`);
@@ -60,8 +61,8 @@ for (const f of readdirSync(docs).filter((n) => n.endsWith(".html"))) {
   for (const [re, repl] of stamps) after = after.replace(re, repl);
   if (after !== before) {
     writeFileSync(path, after);
-    console.log("  ~", `docs/${f}`);
+    console.log("  ~", `src_docs/md/${f}`);
   }
 }
 
-console.log("==> docs/ ready for GitHub Pages.");
+console.log("==> src_docs/md/ demo assets ready; run src_docs/build.sh to rebuild docs/.");

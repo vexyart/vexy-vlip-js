@@ -4,6 +4,8 @@
 
 Turn a single video + WebVTT file into a click-to-advance explainer with styled, positioned on-screen cards — zero runtime dependencies.
 
+**Documentation:** https://vexy.dev/vexy-vlip-js/
+
 ![vexy-vlip-js](docs/assets/icon.png)
 
 ## What it is
@@ -133,7 +135,7 @@ A cue whose trimmed payload starts with `{` is parsed as a JSON card — for per
   "shadow": "0 8px 30px rgba(0,0,0,.45)", "class": "tip" }
 ```
 
-When `x`/`y`/`w` are absent, placement falls back to the cue's native `position`/`line`/`size`, then to the player default (bottom-center, `y: 86%`). The full JSON field list, every option, and all theming variables live in **[docs/reference.md](docs/reference.md)**.
+When `x`/`y`/`w` are absent, placement falls back to the cue's native `position`/`line`/`size`, then to the player default (bottom-center, `y: 88%`). The full JSON field list, every option, and all theming variables are in the **[documentation](https://vexy.dev/vexy-vlip-js/)**: [cue format](https://vexy.dev/vexy-vlip-js/cue-format/), [options](https://vexy.dev/vexy-vlip-js/options/) and [theming](https://vexy.dev/vexy-vlip-js/theming/).
 
 > **Security note.** Plain-text and JSON `text` cards are always HTML-escaped. A JSON `html` card is inserted as-is; `sanitize: true` is a convenience filter (strips `<script>`/`on*`/`javascript:`), **not** a hardened sanitizer. Treat the WebVTT file as trusted, author-controlled content; for untrusted input, sanitize upstream with a vetted library such as DOMPurify.
 
@@ -189,11 +191,11 @@ npm run build        # -> dist/vexy-vlip.element.js + dist/vexy-vlip.global.js
 npm run test:unit    # node --test  (29 unit tests, no DOM)
 npm run test:e2e     # node tests/e2e/run-e2e.mjs  (19 Playwright-library checks)
 npm test             # unit + e2e
-npm run build:docs   # copy bundles into docs/
-./build.sh           # full production build
+npm run build:docs   # copy bundles + media into src_docs/md/ (live demos)
+./build.sh           # tests + bundles + docs site (./build.sh docs|package)
 ```
 
-Live demo: **[vexy.dev/vexy-vlip-js/](https://vexy.dev/vexy-vlip-js/)**
+Live demo: **[vexy.dev/vexy-vlip-js/demo.html](https://vexy.dev/vexy-vlip-js/demo.html)** · Documentation: **[vexy.dev/vexy-vlip-js/](https://vexy.dev/vexy-vlip-js/)**
 
 ## License
 

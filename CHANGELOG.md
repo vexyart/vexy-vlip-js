@@ -6,6 +6,13 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Documentation site
+
+- **ProperDocs + MaterialX docs** at https://vexy.dev/vexy-vlip-js/, built from `src_docs/md/` (config `src_docs/mkdocs.yml`) into `docs/` by `src_docs/build.sh`. Ten pages: home, installation, quick start, authoring cards, options and attributes, API reference, theming, how playback works, live demos, development. `docs/reference.md` content migrated into them.
+- **Demo pages moved** into `src_docs/md/`; the old landing page `docs/index.html` is now `demo.html` (the docs home took over `index.html`). `npm run build:docs` now writes bundles + media into `src_docs/md/`.
+- **`.github/workflows/docs.yml`** rebuilds the bundles and the site on push to `main` and commits `docs/`. `./build.sh` accepts `all|docs|package`.
+- `scripts/verify-docs.mjs` updated for `demo.html`, the Start CTA, and the 9-cue `playlines.vtt`.
+
 ### Maintenance (modernization pass)
 
 - **npm publish workflow** — added `.github/workflows/publish.yml`: publishing a GitHub Release from a `vX.Y.Z` tag stamps the version and runs `npm publish --provenance`. A comment documents the npm trusted-publishing / `NPM_TOKEN` secret setup.

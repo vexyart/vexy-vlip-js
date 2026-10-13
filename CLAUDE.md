@@ -33,14 +33,19 @@ global. Part of the `vexy-stax-dev/` wrapper — work only inside
 - `npm run test:unit` — `node --test` over `tests/` (29 pure-logic checks).
 - `npm run test:e2e` — `tests/e2e/run-e2e.mjs`, a Playwright-library harness
   (19 checks; needs Chromium via `npx playwright install chromium`).
-- `npm run build:docs` — copies bundles into `docs/` and content-hash-stamps the
-  functional demo pages for cache-busting.
+- `npm run build:docs` — copies bundles + testdata media into `src_docs/md/` and
+  content-hash-stamps the functional demo pages for cache-busting.
+- `src_docs/build.sh` — ProperDocs strict build of `src_docs/md/` into `docs/`
+  (wipes `docs/`). `./build.sh docs` runs bundles + build:docs + this.
 
 ## Docs & release
 
-- README ≤200 lines (quick start). Full option / JSON-field / theming tables
-  live in `docs/reference.md`.
-- `docs/` doubles as the deployed demo site (`vexy.dev/vexy-vlip-js/`).
+- README ≤200 lines (quick start). Full docs live in `src_docs/md/*.md`
+  (config `src_docs/mkdocs.yml`), published at `vexy.dev/vexy-vlip-js/`.
+- Demo pages (`demo.html`, `demo-*.html`), media and bundles live in
+  `src_docs/md/` and are copied verbatim into `docs/`. Never edit `docs/` by hand.
+- `.github/workflows/docs.yml` rebuilds bundles + site on push to main and
+  commits `docs/`.
 - Release: `uvx gitnextver@latest <this folder>` commits, bumps the patch tag,
   and pushes. Publishing a GitHub Release from that tag triggers
   `.github/workflows/publish.yml` → `npm publish` (needs npm trusted publishing

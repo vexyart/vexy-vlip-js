@@ -21,21 +21,21 @@ const ok = (name) => console.log(`  ✔ ${name}`);
 const bad = (name, e) => { failures++; console.error(`  ✘ ${name}\n      ${e.message}`); };
 
 try {
-  if (!(await waitServer(`${BASE}/index.html`))) throw new Error("vite did not start");
+  if (!(await waitServer(`${BASE}/demo.html`))) throw new Error("vite did not start");
   browser = await chromium.launch({ args: ["--autoplay-policy=no-user-gesture-required"] });
 
-  // index.html — global build, hero <vexy-vlip>, stepped
+  // demo.html — global build, hero <vexy-vlip>, stepped
   try {
     const page = await browser.newContext({ viewport: { width: 1100, height: 820 } }).then((c) => c.newPage());
-    await page.goto(`${BASE}/index.html`);
+    await page.goto(`${BASE}/demo.html`);
     await page.waitForFunction(() => { const el = document.getElementById("hero"); return el && el.ready; }, null, { timeout: 15000 });
-    assert.equal(await page.evaluate(() => document.getElementById("hero").segments.length), 10, "hero has 10 cards");
-    await page.locator("#hero .vexy-vlip__tap").click();
+    assert.equal(await page.evaluate(() => document.getElementById("hero").segments.length), 9, "hero has 9 cards");
+    await page.locator("#hero .vexy-vlip__start").click(); // the Start CTA covers the tap layer until dismissed
     await page.locator("#hero .vexy-vlip__card--in").waitFor({ state: "visible", timeout: 15000 });
-    ok("index.html: global build, hero advances and shows a card");
+    ok("demo.html: global build, hero advances and shows a card");
     await page.screenshot({ path: "scripts/docs-index.png" });
     await page.close();
-  } catch (e) { bad("index.html", e); }
+  } catch (e) { bad("demo.html", e); }
 
   // demo-module.html — ESM import { VexyVlip }
   try {
@@ -64,8 +64,8 @@ try {
     await page.waitForFunction(() => typeof window.VexyVlip === "function", null, { timeout: 15000 });
     await page.waitForFunction(() => document.querySelector("#host .vexy-vlip__dot"), null, { timeout: 15000 });
     const dots = await page.locator("#host .vexy-vlip__dot").count();
-    assert.equal(dots, 10, "library demo playlines.vtt -> 10 dots");
-    ok("demo-library.html: window.VexyVlip works (10 cards)");
+    assert.equal(dots, 9, "library demo playlines.vtt -> 9 dots");
+    ok("demo-library.html: window.VexyVlip works (9 cards)");
     await page.close();
   } catch (e) { bad("demo-library.html", e); }
 } catch (e) {
