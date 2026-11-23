@@ -21,3 +21,4 @@ No npm packages are shipped to end users.
 | --- | --- | --- |
 | `vite` | `^7.1.12` | Dev server and two-pass library build (`VEXY_BUILD=element` → ESM bundle that auto-registers the custom element; `VEXY_BUILD=global` → IIFE that sets `window.VexyVlip`) |
 | `playwright` | `^1.56.1` | Browser automation library used directly in `tests/e2e/run-e2e.mjs`; the `@playwright/test` runner is intentionally not used because its ESM loader is broken under Node 26 |
+| `fly-january` | `0.1.1` | ProperDocs theme and `fly` plugin installed by `src_docs/build.sh` via `uvx` |

@@ -1,4 +1,4 @@
-# vexy-vlip-js
+# vexy-vlip-js {data-toc-label="Vlip"}
 
 `vexy-vlip-js` turns one video and one WebVTT file into an interactive explainer.
 Each WebVTT cue becomes an on-screen **card**: a real HTML panel with its own

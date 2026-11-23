@@ -1,6 +1,6 @@
 # API reference
 
-## `new VexyVlip(target, options)`
+## `new VexyVlip(target, options)` {data-toc-label="Player constructor"}
 
 ```js
 import { VexyVlip } from "vexy-vlip-js";
@@ -95,7 +95,7 @@ With `keyboard: true` (the default), the player root handles these keys:
 | ++f++ | Toggle full screen |
 | ++m++ | Toggle mute |
 
-## The `<vexy-vlip>` element
+## The `<vexy-vlip>` element {data-toc-label="The custom element"}
 
 Importing `vexy-vlip-js/element`, `dist/vexy-vlip.element.js` or the global
 build registers `<vexy-vlip>` once (it is skipped if the name is already

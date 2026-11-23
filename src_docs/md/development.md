@@ -9,7 +9,7 @@ of [github.com/vexyart/vexy-vlip-js](https://github.com/vexyart/vexy-vlip-js).
 - For the browser tests: Chromium for Playwright, installed with
   `npx playwright install chromium`.
 - For the documentation site: [`uv`](https://docs.astral.sh/uv/), which runs
-  ProperDocs through `uvx`.
+  ProperDocs through `uvx` on Python 3.13.
 
 ## npm scripts
 
@@ -38,7 +38,7 @@ The root `build.sh` accepts one target:
 
 ## Documentation site
 
-The site you are reading is built with ProperDocs and the MaterialX theme.
+ProperDocs builds this site with fly-january 0.1.1 and `extra.fly.chrome: none`.
 
 - Markdown sources and the demo pages live in `src_docs/md/`.
 - The configuration is `src_docs/mkdocs.yml`.
