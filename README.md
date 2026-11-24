@@ -192,7 +192,7 @@ npm run test:unit    # node --test  (29 unit tests, no DOM)
 npm run test:e2e     # node tests/e2e/run-e2e.mjs  (19 Playwright-library checks)
 npm test             # unit + e2e
 npm run build:docs   # copy bundles + media into src_docs/md/ (live demos)
-./build.sh           # unit tests + bundles + strict fly-january 0.2.1 docs (./build.sh docs|package)
+./build.sh           # unit tests + bundles + strict fly-january 0.3.0 or later docs (./build.sh docs|package)
 ```
 
 Live demo: **[vexy.dev/vexy-vlip-js/demo.html](https://vexy.dev/vexy-vlip-js/demo.html)** · Documentation: **[vexy.dev/vexy-vlip-js/](https://vexy.dev/vexy-vlip-js/)**

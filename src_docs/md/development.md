@@ -38,7 +38,7 @@ The root `build.sh` accepts one target:
 
 ## Documentation site
 
-ProperDocs builds this site with fly-january 0.2.1 and `extra.fly.chrome: none`.
+ProperDocs builds this site with fly-january 0.3.0 or later and `extra.fly.chrome: none`.
 
 - Markdown sources and the demo pages live in `src_docs/md/`.
 - The configuration is `src_docs/mkdocs.yml`.
