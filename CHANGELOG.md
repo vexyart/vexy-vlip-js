@@ -8,6 +8,7 @@ All notable changes to this project are documented here.
 
 ### Documentation site
 
+- The documentation site uses fly-january 0.4.0 or later (remote theme assets) and loads its Fly CSS and JavaScript from the FontLab CDN.
 - The documentation build accepts fly-january 0.3.0 or later.
 - Site now uses the fly-january 0.2.1 theme (chrome: none).
 - **ProperDocs + MaterialX docs** at https://vexy.dev/vexy-vlip-js/, built from `src_docs/md/` (config `src_docs/mkdocs.yml`) into `docs/` by `src_docs/build.sh`. Ten pages: home, installation, quick start, authoring cards, options and attributes, API reference, theming, how playback works, live demos, development. `docs/reference.md` content migrated into them.

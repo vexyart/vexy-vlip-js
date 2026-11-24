@@ -3,5 +3,5 @@
 # Documentation site
 
 Keep `extra.fly.chrome: none` for this unofficial site. Run `./build.sh docs` to
-refresh the demos and build `src_docs/mkdocs.yml` with fly-january 0.3.0 or later.
+refresh the demos and build `src_docs/mkdocs.yml` with fly-january 0.4.0 or later (remote theme assets).
 See [CLAUDE.md](CLAUDE.md) for the source map and other project commands.
