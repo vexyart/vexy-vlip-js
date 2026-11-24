@@ -16,10 +16,12 @@ All notable changes to this project are documented here.
 
 ### Maintenance (modernization pass)
 
-- **npm publish workflow** — added `.github/workflows/publish.yml`: publishing a GitHub Release from a `vX.Y.Z` tag stamps the version and runs `npm publish --provenance`. A comment documents the npm trusted-publishing / `NPM_TOKEN` secret setup.
-- **README trimmed to 200 lines** — the full option, JSON-field, and theming tables moved into `docs/reference.md`; README keeps the quick start, methods, and events. Corrected the stale test counts (29 unit + 19 e2e).
-- **`CLAUDE.md`** added with a source map, build/test/release notes, and gotchas.
-- **Project icon** — `docs/assets/icon.png`, a single-line Steinberg-style illustration (hand tapping a play triangle as cards pop up), shown at the top of the README.
+- **npm publish workflow** — added `.github/workflows/publish.yml`: publishing a GitHub Release from a `vX.Y.Z` tag stamps the version and runs `npm publish --provenance`. A comment documents the npm trusted-publishing / `NPM_TOKEN` secret setup (`0d83152`).
+- **README trimmed to 200 lines** — the full option, JSON-field, and theming tables moved into `docs/reference.md`; README keeps the quick start, methods, and events (`0d83152`). The reference later moved into the documentation site (`f00fabe`).
+- Corrected the README test counts to 29 unit and 19 end-to-end checks (`0d83152`).
+- **`CLAUDE.md`** added with a source map, build/test/release notes, and gotchas (`0d83152`).
+- **Project icon** — `docs/assets/icon.png`, a single-line Steinberg-style illustration (hand tapping a play triangle as cards pop up), shown at the top of the README (238,131 bytes, `0d83152`).
+- Updated the changelog and checklist after the build, 29 unit tests and 19 end-to-end checks passed, as recorded in `0d83152:TODO.md`.
 
 ### Added
 
@@ -42,15 +44,18 @@ First stable release. A stop-motion redesign so stepped mode reads like a guided
 
 ### Packaging
 
-- **Published to npm** as `vexy-vlip-js`, usable directly from JSDelivr / unpkg. The package ships both the ESM source (`src/`, zero-dependency, tree-shakeable) and prebuilt bundles (`dist/vexy-vlip.element.js` ESM web component, `dist/vexy-vlip.global.js` classic-script global). `unpkg`/`jsdelivr` fields point at the global build so a bare CDN URL serves the `<script>` bundle. See the README "Use from a CDN" section for versioned URLs and the JSDelivr-vs-`vexy.dev` guidance.
-- **Cache-busted demo deploy**: `build:docs` stamps a short content hash (`?v=…`) onto the bundle `<script>`/`import` references in `docs/*.html`, so the GitHub-Pages / `vexy.dev` demo always serves the freshly built bundle after `./build.sh` instead of a cached copy. The hash only changes when a bundle changes, so unchanged builds don't churn the HTML.
+- **Published to npm** as `vexy-vlip-js`, usable directly from JSDelivr / unpkg. The package ships both the ESM source (`src/`, zero-dependency, tree-shakeable) and prebuilt bundles (`dist/vexy-vlip.element.js` ESM web component, `dist/vexy-vlip.global.js` classic-script global). `unpkg`/`jsdelivr` fields point at the global build so a bare CDN URL serves the `<script>` bundle. See the README "Use from a CDN" section for versioned URLs and the JSDelivr-vs-`vexy.dev` guidance (`72c2515`).
+- **Cache-busted demo deploy**: `build:docs` stamps a short content hash (`?v=…`) onto the bundle `<script>`/`import` references in `docs/*.html`, so the GitHub-Pages / `vexy.dev` demo always serves the freshly built bundle after `./build.sh` instead of a cached copy. The hash only changes when a bundle changes, so unchanged builds don't churn the HTML (`167009f`).
+- Prepared the npm package and changelog for v1.0.0. The checklist records a clean `npm pack --dry-run`, and the release tag points to `167009f`.
+- The issue 101 build, 29 unit tests and 14 end-to-end checks passed, as recorded in `167009f:TODO.md`.
 
 ### Added
 
 - **Stepped-mode dimming overlay** (`overlay` option / attribute, default on): while resting on a card the video is dimmed behind a `--vv-overlay-bg` layer and paused. The dim is customizable via the `dim` option (a `0..1` opacity, or any CSS color) and `--vv-overlay-bg` (default `rgba(0,0,0,0.7)`).
 - **In-card step navigation** (`nav` option, default on): each card carries a footer with a **Back** (`←`) button that jumps to the previous subtitle and an outlined-pill **Next →** button. The whole card is also clickable to advance. Labels are customizable via `nextLabel` / `prevLabel`. The footer never wraps — the **Next** button stays on one line.
 - **Start screen** (`startLabel` option / `start-label` attribute): before playback begins, both modes show the dimmed first frame with a prominent, centered **Start →** button placed directly on the frame (no card), styled like **Next** but 20% larger. Clicking it — or the frame, or pressing Space — begins (stepped advances to the first card; continuous clears the dim and plays). Skipped when `autoplay` (continuous) or `startSegment` is set. The first frame is force-painted under the button (a tiny seek + `requestVideoFrameCallback`) so Safari/iOS show the real frame instead of a blank slate.
-- **Reactive labels** — `start-label` / `next-label` / `prev-label` are observed attributes on `<vexy-vlip>`, so changing them live updates the button text.
+- Chrome showed the first frame at 0.042 s in both playback modes. A Safari window capture confirmed that the frame was visible under Start (`167009f:TODO.md`).
+- **Reactive labels** — `start-label` / `next-label` / `prev-label` are observed attributes on `<vexy-vlip>`, so changing them live updates the button text. The Chrome check exercised live label changes and the Start-to-card flow (`167009f:TODO.md`).
 - **In-card close button** (`closable` option, default on): a **×** in the card's top-right dismisses the cards and drops to a plain video player — switches to continuous mode and resumes playback, so cards then appear only for their cue duration with no dimming. Emits `vexyvlip:close`; exposed as a `close()` method.
 - **Auto-fit / auto-scale** (`autoFit`, default on): cards grow up to `maxWidth` (default 72% of the player) to fit the subtitle, then — if the content still overflows the space the anchor leaves toward the edges — the whole card (text and buttons together) scales down to fit, no smaller than `minScale` (default 0.4). Pivots on the card's anchor so placement is preserved, and re-runs on container resize / fullscreen via a `ResizeObserver`.
 - **Optional step counter** (`counter` option): the `n/total` counter is now **off by default** and opt-in.
