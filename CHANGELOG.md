@@ -8,7 +8,7 @@ All notable changes to this project are documented here.
 
 ### Documentation site
 
-- Site now uses the fly-january 0.1.1 theme (chrome: none).
+- Site now uses the fly-january 0.2.1 theme (chrome: none).
 - **ProperDocs + MaterialX docs** at https://vexy.dev/vexy-vlip-js/, built from `src_docs/md/` (config `src_docs/mkdocs.yml`) into `docs/` by `src_docs/build.sh`. Ten pages: home, installation, quick start, authoring cards, options and attributes, API reference, theming, how playback works, live demos, development. `docs/reference.md` content migrated into them.
 - **Demo pages moved** into `src_docs/md/`; the old landing page `docs/index.html` is now `demo.html` (the docs home took over `index.html`). `npm run build:docs` now writes bundles + media into `src_docs/md/`.
 - **`.github/workflows/docs.yml`** rebuilds the bundles and the site on push to `main` and commits `docs/`. `./build.sh` accepts `all|docs|package`.

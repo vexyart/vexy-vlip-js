@@ -35,7 +35,7 @@ global. Part of the `vexy-stax-dev/` wrapper — work only inside
   (19 checks; needs Chromium via `npx playwright install chromium`).
 - `npm run build:docs` — copies bundles + testdata media into `src_docs/md/` and
   content-hash-stamps the functional demo pages for cache-busting.
-- `src_docs/build.sh` runs a strict ProperDocs build with fly-january 0.1.1
+- `src_docs/build.sh` runs a strict ProperDocs build with fly-january 0.2.1
   (`extra.fly.chrome: none`), replacing `docs/`. `./build.sh docs` rebuilds the demo bundles first.
 
 ## Docs & release
